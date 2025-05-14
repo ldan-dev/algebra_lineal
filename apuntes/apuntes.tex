@@ -1,0 +1,131 @@
+\documentclass{report} % clase de documento
+
+% paquetes necesarios
+\usepackage{fancyhdr} % Encabezado y pie de página
+\usepackage{geometry} % Márgenes del documento
+\usepackage[utf8]{inputenc} % Codificación de caracteres
+\usepackage[spanish]{babel} % Idioma del documento
+\usepackage{amsmath} % Paquete para escribir fórmulas matemáticas
+\usepackage{graphicx} % Paquete para incluir imágenes
+\usepackage{tikz} % Paquete para dibujar en LaTeX
+\usepackage[colorlinks, linkcolor=black]{hyperref} % Paquete para hipervínculos
+% \usepackage{lipsum} % Paquete para generar texto de ejemplo
+
+% configuración de los hipervínculos del documento (colores)
+\hypersetup{
+    colorlinks=true, % false: boxed links; true: colored links
+    linkcolor=black, % color of internal links
+    citecolor=black, % color of links to bibliography
+    filecolor=black, % color of file links
+    urlcolor=black   % color of external links
+}
+
+\geometry{margin=1in} % Márgenes de las páginas
+
+% configuración de los encabezados y pies de página
+\pagestyle{fancy} % Encabezado y pie de página
+\fancyhead{} % Limpia el encabezado
+\fancyhead[L]{Leonardo Daniel Aviña Neri} % Encabezado a la izqui
+\fancyhead[R]{UNIVERSIDAD DE GUANAJUATO} % Encabezado a la derecha
+
+\begin{document} % Inicio del documento
+
+\begin{titlepage} % Portada
+
+    % \begin{tikzpicture}[remember picture, overlay]
+    %     \fill[blue!10,opacity=0.5] (current page.north west) rectangle ([yshift=-\paperheight/1]current page.north east);
+    % \end{tikzpicture}
+
+    \begin{flushleft}
+        \includegraphics[width=0.4\textwidth]{../img/logo_ug.png} % Logo de la universidad
+    \end{flushleft}
+
+    \begin{flushright}
+        \vspace{-1.6cm}
+        \textbf{UNIVERSIDAD DE GUANAJUATO}
+    \end{flushright}
+
+    \vspace{2cm}
+
+    \begin{center}
+        \textbf{\Huge APUNTES ÁLGEBRA LINEAL
+        } % Título en negritas y muy grande
+    \end{center}
+
+    \vspace{2cm}
+    
+    \begin{flushleft}
+        \hspace*{4cm}
+        \textbf{UDA: }Álgebra lineal \\
+        \hspace*{4cm}
+        \textbf{DOCENTE: }Ing Francisco Javier Gonzalez Martinez \\
+        \hspace*{4cm}
+        \textbf{ALUMNO: }Leonardo Daniel Aviña Neri \\
+        \hspace*{4cm}
+        \textbf{FECHA: } 11/01/2025 \\
+        \hspace*{4cm}
+        \textbf{CARRERA:} Licenciatura En Ingeniería De Datos \\
+        \hspace*{4cm}
+        E Inteligencia Artificial (LIDIA) \\
+        \hspace*{4cm}
+        \textbf{CLAVE UDA:} NELI06001
+    \end{flushleft}
+
+    \vfill
+
+    \begin{center}
+        \includegraphics[width=0.4\textwidth]{../img/logo_grande.jpg} \\ % Imagen centrada al final de la hoja
+        \vspace{0.3cm}
+        Semestre Enero-Junio \the\year \
+        Campus Irapuato-Salamanca
+    \end{center}
+\end{titlepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% indice
+\tableofcontents
+% \listoffigures % Lista de figuras (opcional)
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% inicio del contenido del documento
+
+% \include{ch-dedicatoria} % Incluye el archivo ch-dedicatoria.tex
+% \newpage
+
+% parcial 1
+\include{parcial_1/parcial_1}
+
+% parcial 2
+\include{parcial_2/parcial_2}
+
+% parcial 3
+\include{parcial_3/parcial_3}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% un apendice es una sección que se añade al final del documento para incluir información adicional
+% \appendix
+% \include{apendix} % Incluye el archivo c
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% para incluir la bibliografía :
+% \newpage
+% \bibliographystyle{apalike}
+% \bibliography{ref} % Incluye el archivo ref.bib
+% para hacer una cita: \cite{citation_key} ej. \cite{latex_wikipedia} 
+
+\end{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% nueva pagina
+% \newpage
+
+% \section{Otra Sección}\footnotemark
+% Esta es otra página del documento.
+% dsa
+% \footnotetext{Fecha: 11/01/2025}
+
+% este es mi footnote:\footnote{Este es un pie de página!} \
+% con footnotemark\footnotemark puedo hacer un placeholder y no definirlo hasta despues y refernciarlo despues \footnotemark[\value{footnote}] 
+% \footnotetext{este es el footnotemark}

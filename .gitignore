@@ -1,0 +1,66 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Distribution / packaging
+*.exe
+*.pkg
+*.pkg.tar.xz
+*.tgz
+*.zip
+*.tar.gz
+*.whl
+
+# Build folders
+**/build/
+**/dist/
+
+# VS Code
+.vscode/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# LaTeX
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+.*.lb
+*.fdb_latexmk
+*.synctex.gz
+
+# Specific to your project
+proyecto/build/
+proyecto/dist/
+py_programa/__pycache__/
+proyecto-final/__pycache__/
+proyecto/__pycache__/
+
+formulario-2.pdf
+
