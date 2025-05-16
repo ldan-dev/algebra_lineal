@@ -3,7 +3,6 @@ LEONARDO DANIEL AVIÑA NERI
 Fecha: 28/04/2025 (dd/mm/aaaa)
 CARRERA: LIDIA
 Universidad de Guanajuato - Campus Irapuato-Salamanca
-Correo: ld.avinaneri@ugto.mx
 UDA: Álgebra Lineal
 DESCRIPCION: Implementación de una clase de Álgebra Lineal que proporciona
              operaciones comunes como productos escalares y vectoriales,
@@ -31,7 +30,6 @@ class AlgebraLineal:
     """
     
     # ======================== OPERACIONES CON VECTORES ========================
-    
     @staticmethod
     def producto_escalar(v1, v2):
         """
@@ -54,35 +52,101 @@ class AlgebraLineal:
         if len(v1) != len(v2):
             raise ValueError("Los vectores deben tener la misma dimensión")
         
-        return sum(a * b for a, b in zip(v1, v2))
-    
+        resultado = 0
+        for i in range(len(v1)):
+            resultado += v1[i] * v2[i]
+        return resultado
     @staticmethod
     def producto_vectorial(v1, v2):
         """
-        Calcula el producto vectorial (producto cruz) entre dos vectores 3D.
+        Calcula el producto vectorial (producto cruz) entre dos vectores. 
+        Funciona para vectores de cualquier dimensión, aunque el producto vectorial
+        está únicamente definido de forma estándar para vectores en R³.
+        
+        - Para vectores 3D (R³): Implementa el producto vectorial estándar.
+        - Para vectores 2D (R²): Los trata como vectores 3D con componente z=0, 
+          retornando un vector en R³ perpendicular al plano que contiene v1 y v2.
+        - Para vectores de dimensión n>3: Implementa una generalización del producto
+          vectorial usando determinantes de submatrices.
         
         Args:
-            v1 (list): Primer vector 3D
-            v2 (list): Segundo vector 3D
+            v1 (list): Primer vector
+            v2 (list): Segundo vector con la misma dimensión que v1
             
         Returns:
-            list: Vector resultante del producto vectorial
+            list: Resultado del producto vectorial
             
         Raises:
-            ValueError: Si los vectores no son tridimensionales
+            ValueError: Si los vectores tienen dimensiones diferentes
             
         Example:
-            resultado = AlgebraLineal.producto_vectorial([1, 0, 0], [0, 1, 0])
-            # Retorna: [0, 0, 1]
+            resultado = AlgebraLineal.producto_vectorial([1, 2, 3], [4, 5, 6])
+            # Retorna: [-3, 6, -3]
         """
-        if len(v1) != 3 or len(v2) != 3:
-            raise ValueError("El producto vectorial solo está definido para vectores 3D")
+        if len(v1) != len(v2):
+            raise ValueError("Los vectores deben tener la misma dimensión")
         
-        return [
-            v1[1] * v2[2] - v1[2] * v2[1],
-            v1[2] * v2[0] - v1[0] * v2[2],
-            v1[0] * v2[1] - v1[1] * v2[0]
-        ]
+        dimension = len(v1)
+        
+        # Caso especial para vectores de dimensión 2
+        if dimension == 2:
+            # Tratar como vectores 3D con z=0
+            v1_3d = v1 + [0]
+            v2_3d = v2 + [0]
+            return AlgebraLineal.producto_vectorial(v1_3d, v2_3d)
+        
+        # Caso para vectores 3D (fórmula estándar)
+        if dimension == 3:
+            return [
+                v1[1] * v2[2] - v1[2] * v2[1],  # i componente
+                v1[2] * v2[0] - v1[0] * v2[2],  # j componente
+                v1[0] * v2[1] - v1[1] * v2[0]   # k componente
+            ]
+        
+        # Caso general para n dimensiones
+        if dimension < 2:
+            raise ValueError("El producto vectorial requiere vectores de al menos dimensión 2")
+        
+        # Para n > 3, utilizamos una generalización basada en determinantes
+        resultado = []
+        base_estandar = AlgebraLineal.crear_matriz_identidad(dimension)
+        
+        for i in range(dimension):
+            # Crear una matriz donde la primera fila es el i-ésimo vector de la base estándar
+            # la segunda fila es v1, y la tercera es v2
+            matriz = [base_estandar[i], v1, v2]
+            
+            # Calcular el determinante de esta matriz 3xn expandiendo por la primera fila
+            det = 0
+            signo = 1
+            
+            # Para cada elemento del vector base, calculamos su menor y lo multiplicamos
+            for j in range(dimension):
+                # Construir submatriz excluyendo fila 0 y columna j
+                submatriz = []
+                for fila in range(1, 3):  # Solo filas 1 y 2 (v1 y v2)
+                    submatriz_fila = []
+                    for col in range(dimension):
+                        if col != j:
+                            submatriz_fila.append(matriz[fila][col])
+                    submatriz.append(submatriz_fila)
+                
+                # Si el vector base tiene un 1 en posición j, contribuye al determinante
+                if matriz[0][j] == 1:
+                    # Determinante de matriz 2x2
+                    det_submatriz = 0
+                    for k in range(dimension - 1):
+                        for l in range(dimension - 1):
+                            if k != l:  # Solo consideramos elementos fuera de la diagonal
+                                det_submatriz += submatriz[0][k] * submatriz[1][l] * ((-1) ** (k + l))
+                    
+                    det += signo * det_submatriz
+                
+                signo = -signo
+            
+            resultado.append(det)
+        
+        return resultado
     
     @staticmethod
     def suma_vectores(v1, v2):
@@ -106,7 +170,10 @@ class AlgebraLineal:
         if len(v1) != len(v2):
             raise ValueError("Los vectores deben tener la misma dimensión")
         
-        return [a + b for a, b in zip(v1, v2)]
+        resultado = []
+        for i in range(len(v1)):
+            resultado.append(v1[i] + v2[i])
+        return resultado
     
     @staticmethod
     def resta_vectores(v1, v2):
@@ -130,7 +197,10 @@ class AlgebraLineal:
         if len(v1) != len(v2):
             raise ValueError("Los vectores deben tener la misma dimensión")
         
-        return [a - b for a, b in zip(v1, v2)]
+        resultado = []
+        for i in range(len(v1)):
+            resultado.append(v1[i] - v2[i])
+        return resultado
     
     @staticmethod
     def escalar_por_vector(escalar, vector):
@@ -319,8 +389,13 @@ class AlgebraLineal:
             resultado = AlgebraLineal.suma_matrices([[1, 2], [3, 4]], [[5, 6], [7, 8]])
             # Retorna: [[6, 8], [10, 12]]
         """
-        if len(m1) != len(m2) or any(len(fila1) != len(fila2) for fila1, fila2 in zip(m1, m2)):
+        # Comprobar si las matrices tienen las mismas dimensiones
+        if len(m1) != len(m2):
             raise ValueError("Las matrices deben tener las mismas dimensiones")
+        
+        for i in range(len(m1)):
+            if len(m1[i]) != len(m2[i]):
+                raise ValueError("Las matrices deben tener las mismas dimensiones")
         
         filas = len(m1)
         columnas = len(m1[0])
@@ -331,6 +406,7 @@ class AlgebraLineal:
                 resultado[i][j] = m1[i][j] + m2[i][j]
                 
         return resultado
+    
     
     @staticmethod
     def resta_matrices(m1, m2):
@@ -351,8 +427,13 @@ class AlgebraLineal:
             resultado = AlgebraLineal.resta_matrices([[6, 8], [10, 12]], [[1, 2], [3, 4]])
             # Retorna: [[5, 6], [7, 8]]
         """
-        if len(m1) != len(m2) or any(len(fila1) != len(fila2) for fila1, fila2 in zip(m1, m2)):
+        # Comprobar si las matrices tienen las mismas dimensiones
+        if len(m1) != len(m2):
             raise ValueError("Las matrices deben tener las mismas dimensiones")
+        
+        for i in range(len(m1)):
+            if len(m1[i]) != len(m2[i]):
+                raise ValueError("Las matrices deben tener las mismas dimensiones")
         
         filas = len(m1)
         columnas = len(m1[0])
@@ -640,7 +721,12 @@ class AlgebraLineal:
             origen = [0] * dim
             
         if etiquetas is None:
-            etiquetas = [f"Vector {i+1}" for i in range(len(vectores))]
+            # Generar etiquetas que muestren los elementos de los vectores
+            etiquetas = []
+            for i, v in enumerate(vectores):
+                # Formatear vector como (v1, v2, v3, ...) para la etiqueta
+                components_str = ", ".join(str(round(component, 2)) for component in v)
+                etiquetas.append(f"v{i+1}=({components_str})")
             
         # Preparar colores
         colores = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
@@ -891,9 +977,10 @@ class AlgebraLineal:
         # Inicializar el resultado con ceros
         dimension = len(vectores[0])
         resultado = [0] * dimension
-        
-        # Sumar cada vector multiplicado por su coeficiente
-        for vector, coef in zip(vectores, coeficientes):
+          # Sumar cada vector multiplicado por su coeficiente
+        for j in range(len(vectores)):
+            vector = vectores[j]
+            coef = coeficientes[j]
             for i in range(dimension):
                 resultado[i] += coef * vector[i]
                 
@@ -945,3 +1032,6 @@ class AlgebraLineal:
             return True, solucion
         else:
             return False, "El vector no es combinación lineal del conjunto dado."
+        
+
+    
