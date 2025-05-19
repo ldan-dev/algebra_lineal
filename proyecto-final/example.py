@@ -143,16 +143,13 @@ def main():
     print("Mostrando transformación lineal en 3D (rotación alrededor del eje Z)...")
     # Matriz de rotación 45 grados alrededor del eje Z
     angulo = math.pi/4  # 45 grados
+    
     matriz_rotacion_z = [
         [math.cos(angulo), -math.sin(angulo), 0],
         [math.sin(angulo), math.cos(angulo), 0],
         [0, 0, 1]
     ]
-    AL.graficar_transformacion_lineal_3d(matriz_rotacion_z, titulo="Rotación 45° alrededor del eje Z")
-
-
-if __name__ == "__main__":
-    main()
+    # AL.graficar_transformacion_lineal_3d(matriz_rotacion_z, titulo="Rotación 45° alrededor del eje Z")
 
 
 if __name__ == "__main__":

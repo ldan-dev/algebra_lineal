@@ -30,6 +30,9 @@ class AlgebraLineal:
     - Cálculo de determinantes
     """
     
+    # Constante de tolerancia para comparaciones numéricas (detectar valores "casi cero")
+    TOLERANCIA = 1e-10
+    
     # ======================== OPERACIONES CON VECTORES ========================
     @staticmethod
     def producto_escalar(v1, v2):
@@ -107,8 +110,7 @@ class AlgebraLineal:
         # Caso general para n dimensiones
         if dimension < 2:
             raise ValueError("El producto vectorial requiere vectores de al menos dimensión 2")
-        
-        # Para n > 3, utilizamos una generalización basada en determinantes
+          # Para n > 3, utilizamos una generalización basada en determinantes
         resultado = []
         base_estandar = AlgebraLineal.crear_matriz_identidad(dimension)
         
@@ -117,31 +119,40 @@ class AlgebraLineal:
             # la segunda fila es v1, y la tercera es v2
             matriz = [base_estandar[i], v1, v2]
             
-            # Calcular el determinante de esta matriz 3xn expandiendo por la primera fila
+            # Calcular el determinante del menor correspondiente
             det = 0
             signo = 1
             
             # Para cada elemento del vector base, calculamos su menor y lo multiplicamos
             for j in range(dimension):
-                # Construir submatriz excluyendo fila 0 y columna j
-                submatriz = []
-                for fila in range(1, 3):  # Solo filas 1 y 2 (v1 y v2)
-                    submatriz_fila = []
-                    for col in range(dimension):
-                        if col != j:
-                            submatriz_fila.append(matriz[fila][col])
-                    submatriz.append(submatriz_fila)
-                
                 # Si el vector base tiene un 1 en posición j, contribuye al determinante
                 if matriz[0][j] == 1:
-                    # Determinante de matriz 2x2
-                    det_submatriz = 0
-                    for k in range(dimension - 1):
-                        for l in range(dimension - 1):
-                            if k != l:  # Solo consideramos elementos fuera de la diagonal
-                                det_submatriz += submatriz[0][k] * submatriz[1][l] * ((-1) ** (k + l))
+                    # Construir submatriz 2x(n-1) excluyendo fila 0 y columna j
+                    submatriz = []
+                    for fila in range(1, 3):  # Solo filas 1 y 2 (v1 y v2)
+                        submatriz_fila = []
+                        for col in range(dimension):
+                            if col != j:
+                                submatriz_fila.append(matriz[fila][col])
+                        submatriz.append(submatriz_fila)
                     
-                    det += signo * det_submatriz
+                    # Calcular determinante de la submatriz 2x(n-1)
+                    # Para una matriz 2x2, el determinante es simple
+                    if dimension == 3:  # Caso especial para 3D
+                        det_submatriz = submatriz[0][0] * submatriz[1][1] - submatriz[0][1] * submatriz[1][0]
+                        det += signo * det_submatriz
+                    else:
+                        # Para matrices 2x(n-1) con n>3, seleccionamos todas las combinaciones posibles
+                        # de 2 columnas y calculamos determinantes de las submatrices 2x2 resultantes
+                        det_submatriz = 0
+                        for k in range(dimension - 2):  # n-2 porque ya excluimos una columna
+                            for l in range(k + 1, dimension - 1):
+                                # Determinante de la submatriz 2x2
+                                minor_det = submatriz[0][k] * submatriz[1][l] - submatriz[0][l] * submatriz[1][k]
+                                # Ajustar el signo según la posición de las columnas
+                                det_submatriz += minor_det * ((-1) ** (k + l))
+                                
+                        det += signo * det_submatriz
                 
                 signo = -signo
             
@@ -553,11 +564,12 @@ class AlgebraLineal:
         """
         return [[matriz[i][j] for j in range(len(matriz[0])) if j != columna_excluida]
                 for i in range(len(matriz)) if i != fila_excluida]
-    
     @staticmethod
     def determinante(matriz):
         """
-        Calcula el determinante de una matriz usando expansión por cofactores.
+        Calcula el determinante de una matriz.
+        Para matrices pequeñas, usa expansión por cofactores.
+        Para matrices grandes (n > 3), usa eliminación gaussiana para mejor rendimiento.
         
         Args:
             matriz (list): Matriz cuadrada
@@ -586,11 +598,22 @@ class AlgebraLineal:
         if filas == 2:
             return matriz[0][0] * matriz[1][1] - matriz[0][1] * matriz[1][0]
         
-        # Expansión por cofactores a lo largo de la primera fila
+        # Caso base: matriz 3x3 (fórmula directa para optimización)
+        if filas == 3:
+            a, b, c = matriz[0]
+            d, e, f = matriz[1]
+            g, h, i = matriz[2]
+            return (a * e * i + b * f * g + c * d * h) - (c * e * g + a * f * h + b * d * i)
+        
+        # Para matrices grandes (n ≥ 4), usamos eliminación gaussiana para mejor rendimiento
+        if filas >= 4:
+            return AlgebraLineal._determinante_gauss(matriz)
+        
+        # Expansión por cofactores a lo largo de la primera fila para matrices medianas
         det = 0
         for j in range(filas):
             cofactor = matriz[0][j] * AlgebraLineal.determinante(AlgebraLineal.submatriz(matriz, 0, j))
-            det += cofactor if j % 2 == 0 : -cofactor
+            det += cofactor if j % 2 == 0 else -cofactor
             
         return det
     
@@ -617,11 +640,10 @@ class AlgebraLineal:
         # Comprobar si es una matriz cuadrada
         if any(len(fila) != filas for fila in matriz):
             raise ValueError("La matriz debe ser cuadrada para calcular su inversa")
-        
-        # Calcular el determinante
+          # Calcular el determinante
         det = AlgebraLineal.determinante(matriz)
         
-        if abs(det) < 1e-10:  # Usar una tolerancia pequeña para evitar problemas de precisión
+        if abs(det) < AlgebraLineal.TOLERANCIA:  # Usar la tolerancia definida para evitar problemas de precisión
             raise ValueError("La matriz no es invertible (determinante = 0)")
         
         # Para una matriz 1x1, la inversa es trivial
@@ -650,7 +672,7 @@ class AlgebraLineal:
         return inversa
     
     # ======================== VISUALIZACIÓN ========================
-      @staticmethod
+    @staticmethod
     def graficar_funcion(f, x_min, x_max, puntos=100, titulo="Gráfica de función", etiqueta_x="x", etiqueta_y="f(x)", mostrar_puntos_destacados=True):
         """
         Grafica una función en un intervalo dado.
@@ -1014,13 +1036,14 @@ class AlgebraLineal:
             ax2.text(vector_e1_transformado[0]*1.1, vector_e1_transformado[1]*1.1, vector_e1_transformado[2]*1.1, 
                     f"T(e₁)=({vector_e1_transformado[0]:.1f},{vector_e1_transformado[1]:.1f},{vector_e1_transformado[2]:.1f})", color='r')
             ax2.text(vector_e2_transformado[0]*1.1, vector_e2_transformado[1]*1.1, vector_e2_transformado[2]*1.1, 
-                    f"T(e₂)=({vector_e2_transformado[0]:.1f},{vector_e2_transformado[1]:.1f},{vector_e2_transformado[2]:.1f})", color='g')
+                    f"T(e₂)=({vector_e2_transformado[0]:.1f},{vector_e2_transformado[1]:.1f},{vector_e2_transformado[2]:.1f})", color='g'),
             ax2.text(vector_e3_transformado[0]*1.1, vector_e3_transformado[1]*1.1, vector_e3_transformado[2]*1.1, 
                     f"T(e₃)=({vector_e3_transformado[0]:.1f},{vector_e3_transformado[1]:.1f},{vector_e3_transformado[2]:.1f})", color='b')
             
             # Agregar matriz de transformación como texto en la gráfica
             matriz_str = f"T = [{matriz[0,0]:.1f} {matriz[0,1]:.1f} {matriz[0,2]:.1f}\n     {matriz[1,0]:.1f} {matriz[1,1]:.1f} {matriz[1,2]:.1f}\n     {matriz[2,0]:.1f} {matriz[2,1]:.1f} {matriz[2,2]:.1f}]"
-            ax2.text2D(0.05, 0.95, matriz_str, transform=ax2.transAxes, fontsize=10,
+            # Use text instead of text2D for 3D axes
+            ax2.text(0, 0, 0, matriz_str, transform=ax2.transAxes, fontsize=10,
                      verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
         
         # Calcular los límites para mantener la proporción en la vista transformada
@@ -1083,9 +1106,8 @@ class AlgebraLineal:
                 if abs(matriz[i][columna_actual]) > max_valor:
                     max_fila = i
                     max_valor = abs(matriz[i][columna_actual])
-            
-            # Si el máximo es cero, esta columna ya está reducida
-            if max_valor < 1e-10:  # Usar tolerancia para errores de punto flotante
+              # Si el máximo es cero, esta columna ya está reducida
+            if max_valor < AlgebraLineal.TOLERANCIA:  # Usar tolerancia para errores de punto flotante
                 continue
                 
             # Intercambiar filas si es necesario
@@ -1105,11 +1127,10 @@ class AlgebraLineal:
                         matriz[i][j] -= factor * matriz[fila_actual][j]
             
             fila_actual += 1
-        
-        # Verificar si el sistema es incompatible
+          # Verificar si el sistema es incompatible
         for i in range(fila_actual, filas):
             # Si hay una fila con todos ceros excepto el término independiente
-            if all(abs(matriz[i][j]) < 1e-10 for j in range(n_variables)) and abs(matriz[i][n_variables]) > 1e-10:
+            if all(abs(matriz[i][j]) < AlgebraLineal.TOLERANCIA for j in range(n_variables)) and abs(matriz[i][n_variables]) > AlgebraLineal.TOLERANCIA:
                 return None, "incompatible"
         
         # Verificar si el sistema tiene infinitas soluciones
@@ -1119,7 +1140,6 @@ class AlgebraLineal:
         # El sistema tiene solución única
         return [matriz[i][n_variables] for i in range(n_variables)], "unica"
     
-
     @staticmethod
     def gauss(matriz_aumentada, verbose=False):
         """
@@ -1172,13 +1192,13 @@ class AlgebraLineal:
                 amat[k], amat[max_fil] = amat[max_fil], amat[k]
             
             # Si el pivote es casi cero, marcar como singular y continuar
-            if abs(amat[k][k]) < 1e-9:
+            if abs(amat[k][k]) < AlgebraLineal.TOLERANCIA:
                 is_sngl = True
                 continue
             
             # Eliminar la variable actual de las ecuaciones siguientes
             for i in range(k + 1, n_eq):
-                if abs(amat[i][k]) > 1e-9 and abs(amat[k][k]) > 1e-9:
+                if abs(amat[i][k]) > AlgebraLineal.TOLERANCIA and abs(amat[k][k]) > AlgebraLineal.TOLERANCIA:
                     fact = amat[i][k] / amat[k][k]
                     for j in range(k, n_var + 1):
                         amat[i][j] -= fact * amat[k][j]
@@ -1195,11 +1215,11 @@ class AlgebraLineal:
         for i in range(num_piv, n_eq):
             all_z_cof = True
             for j in range(n_var):
-                if abs(amat[i][j]) > 1e-9:
+                if abs(amat[i][j]) > AlgebraLineal.TOLERANCIA:
                     all_z_cof = False
                     break
             
-            if all_z_cof and abs(amat[i][n_var]) > 1e-9:
+            if all_z_cof and abs(amat[i][n_var]) > AlgebraLineal.TOLERANCIA:
                 is_incn = True
                 break
         
@@ -1220,7 +1240,7 @@ class AlgebraLineal:
                     for j in range(i + 1, n_var):
                         curr_sum += amat[i][j] * sol[j]
                     
-                    if abs(amat[i][i]) < 1e-9:
+                    if abs(amat[i][i]) < AlgebraLineal.TOLERANCIA:
                         if verbose:
                             print("\nEl sistema tiene infinitas soluciones o es incompatible.")
                         return None, "infinitas"
@@ -1263,8 +1283,66 @@ class AlgebraLineal:
             matriz_aumentada.append(fila)
             
         return AlgebraLineal.gauss_jordan(matriz_aumentada)
+      # ======================== ANÁLISIS DE INDEPENDENCIA LINEAL ========================
     
-    # ======================== ANÁLISIS DE INDEPENDENCIA LINEAL ========================
+    @staticmethod
+    def calcular_rango(matriz):
+        """
+        Calcula el rango de una matriz utilizando eliminación gaussiana.
+        
+        Args:
+            matriz (list): Matriz de entrada
+            
+        Returns:
+            int: Rango de la matriz
+        """
+        # Hacer una copia profunda de la matriz para no modificar la original
+        mat = [fila[:] for fila in matriz]
+        filas = len(mat)
+        if filas == 0:
+            return 0
+        columnas = len(mat[0])
+        
+        # Variable para rastrear la fila y columna actual durante la eliminación
+        fila_actual = 0
+        for columna_actual in range(columnas):
+            # Si estamos al final de las filas, terminamos
+            if fila_actual >= filas:
+                break
+                
+            # Encontrar el pivote máximo en esta columna (por estabilidad numérica)
+            max_fila = fila_actual
+            max_valor = abs(mat[fila_actual][columna_actual])
+            
+            for i in range(fila_actual + 1, filas):
+                if abs(mat[i][columna_actual]) > max_valor:
+                    max_fila = i
+                    max_valor = abs(mat[i][columna_actual])
+            
+            # Si el máximo es cero, esta columna ya está reducida
+            if max_valor < AlgebraLineal.TOLERANCIA:
+                continue
+                
+            # Intercambiar filas si es necesario
+            if max_fila != fila_actual:
+                mat[fila_actual], mat[max_fila] = mat[max_fila], mat[fila_actual]
+                
+            # Normalizar la fila del pivote
+            pivote = mat[fila_actual][columna_actual]
+            for j in range(columna_actual, columnas):
+                mat[fila_actual][j] /= pivote
+                
+            # Eliminar esta variable de las otras filas
+            for i in range(filas):
+                if i != fila_actual:
+                    factor = mat[i][columna_actual]
+                    for j in range(columna_actual, columnas):
+                        mat[i][j] -= factor * mat[fila_actual][j]
+            
+            fila_actual += 1
+        
+        # El rango es el número de filas no nulas
+        return fila_actual
     
     @staticmethod
     def es_linealmente_independiente(vectores):
@@ -1293,30 +1371,22 @@ class AlgebraLineal:
         
         # Comprobar que todos los vectores tienen la misma dimensión
         if any(len(v) != dimension for v in vectores):
-            return False, "Todos los vectores deben tener la misma dimensión."
+            return False, f"Todos los vectores deben tener la misma dimension"
         
         # Caso especial: si algún vector es el vector cero
         for i, v in enumerate(vectores):
-            if all(abs(comp) < 1e-10 for comp in v):
+            if all(abs(comp) < AlgebraLineal.TOLERANCIA for comp in v):
                 return False, f"El vector {i+1} es el vector cero, por lo que el conjunto no es linealmente independiente."
         
         # Caso especial: si hay un solo vector no nulo
         if n_vectores == 1:
             return True, "Un conjunto con un solo vector no nulo es linealmente independiente."
         
-        # Formar la matriz con los vectores como columnas
+        # Formar la matriz con los vectores como columnas para calcular su rango
         matriz = AlgebraLineal.transpuesta(vectores)
         
-        # Calcular el rango de la matriz
-        # Usamos nuestro método gauss_jordan 
-        # Primero creamos una matriz aumentada con una columna de ceros
-        matriz_aumentada = [fila + [0] for fila in matriz]
-        solucion, tipo = AlgebraLineal.gauss_jordan(matriz_aumentada)
-        
-        # El rango es igual al número de filas no nulas después de la eliminación
-        # Esto se refleja en el número de elementos de la solución que no son arbitrarios
-        rango = sum(1 for i in range(min(len(matriz), len(matriz[0]))) 
-                   if any(abs(matriz_aumentada[i][j]) > 1e-10 for j in range(len(matriz[0]))))
+        # Calcular el rango de la matriz usando nuestro método optimizado
+        rango = AlgebraLineal.calcular_rango(matriz)
         
         if rango == n_vectores:
             return True, f"Los vectores son linealmente independientes porque el rango de la matriz formada por ellos es {rango}, igual al número de vectores."
@@ -1347,21 +1417,19 @@ class AlgebraLineal:
         
         if not vectores:
             return []
-        
-        # Inicializar el resultado con ceros
+          # Inicializar el resultado con ceros
         dimension = len(vectores[0])
         resultado = [0] * dimension
-          # Sumar cada vector multiplicado por su coeficiente
+        
+        # Sumar cada vector multiplicado por su coeficiente
         for j in range(len(vectores)):
             vector = vectores[j]
             coef = coeficientes[j]
             for i in range(dimension):
                 resultado[i] += coef * vector[i]
-                
+        
         return resultado
     
-
-
     @staticmethod
     def es_combinacion_lineal(vector, conjunto_vectores):
         """
@@ -1400,14 +1468,58 @@ class AlgebraLineal:
         
         # Verificar la solución reconstruyendo el vector
         reconstruccion = AlgebraLineal.combinacion_lineal(conjunto_vectores, solucion)
-        
-        # Comparar con cierta tolerancia debido a errores de punto flotante
-        es_igual = all(abs(reconstruccion[i] - vector[i]) < 1e-10 for i in range(dimension))
+          # Comparar con cierta tolerancia debido a errores de punto flotante
+        es_igual = all(abs(reconstruccion[i] - vector[i]) < AlgebraLineal.TOLERANCIA for i in range(dimension))
         
         if es_igual:
             return True, solucion
         else:
             return False, "El vector no es combinación lineal del conjunto dado."
+    
+    @staticmethod
+    def _determinante_gauss(matriz):
+        """
+        Calcula el determinante usando eliminación gaussiana.
+        Este método es más eficiente para matrices grandes.
+        
+        Args:
+            matriz (list): Matriz cuadrada
+            
+        Returns:
+            float: Determinante de la matriz
+        """
+        # Crear copia de la matriz para no modificar la original
+        n = len(matriz)
+        mat = [fila[:] for fila in matriz]
+        
+        # Factor que rastrea el cambio en el determinante
+        det = 1.0
+        
+        # Eliminación gaussiana
+        for i in range(n):
+            # Si el elemento diagonal es cero, intercambiar con una fila posterior
+            if abs(mat[i][i]) < AlgebraLineal.TOLERANCIA:
+                # Buscar fila con elemento no cero en esta columna
+                for k in range(i + 1, n):
+                    if abs(mat[k][i]) > AlgebraLineal.TOLERANCIA:
+                        mat[i], mat[k] = mat[k], mat[i]
+                        # Cada intercambio cambia el signo del determinante
+                        det = -det
+                        break
+                else:
+                    # Si no se encontró fila con elemento no cero, el determinante es cero
+                    return 0.0
+            
+            # Multiplicar el determinante por el pivote diagonal
+            det *= mat[i][i]
+            
+            # Eliminar elementos debajo del pivote
+            for k in range(i + 1, n):
+                factor = mat[k][i] / mat[i][i]
+                for j in range(i, n):
+                    mat[k][j] -= factor * mat[i][j]
+        
+        return det
 
 
 
