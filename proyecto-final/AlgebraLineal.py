@@ -865,6 +865,126 @@ class AlgebraLineal:
         # El sistema tiene solución única
         return [matriz[i][n_variables] for i in range(n_variables)], "unica"
     
+
+    @staticmethod
+    def gauss(matriz_aumentada, verbose=False):
+        """
+        Resuelve un sistema de ecuaciones lineales usando el método de eliminación Gaussiana.
+        
+        Args:
+            matriz_aumentada (list): Matriz aumentada [A|b] donde A es la matriz de coeficientes
+                                    y b es el vector de términos independientes
+            verbose (bool, optional): Si es True, muestra información detallada del proceso. Por defecto es False.
+        
+        Returns:
+            tuple: (solucion, tipo_solucion)
+                  - solucion: Lista con la solución si es única, None en caso contrario
+                  - tipo_solucion: String indicando el tipo de solución ("unica", "infinitas", "incompatible")
+        
+        Example:
+            solucion, tipo = AlgebraLineal.gauss([[1, 1, 1, 6], [2, -1, 3, 9], [3, 2, -4, 3]])
+            # Para el sistema: x + y + z = 6, 2x - y + 3z = 9, 3x + 2y - 4z = 3
+        """
+        # Hacer una copia profunda de la matriz para no modificar la original
+        amat = [fila[:] for fila in matriz_aumentada]
+        
+        n_eq = len(amat)  # Número de ecuaciones (filas)
+        n_var = len(amat[0]) - 1  # Número de variables (columnas - 1)
+        
+        if verbose:
+            print("\n--- Sistema ingresado ---")
+            for i in range(n_eq):
+                for j in range(n_var):
+                    print(f"{amat[i][j]:.2f}x_{j+1}", end="")
+                    if j < n_var - 1:
+                        print(" + ", end="")
+                print(f" = {amat[i][n_var]:.2f}")
+        
+        num_piv = min(n_eq, n_var)
+        is_sngl = False
+        
+        # Eliminación Gaussiana hacia adelante
+        for k in range(num_piv):
+            # Pivoteo parcial: encontrar el valor máximo en la columna actual
+            max_val = abs(amat[k][k])
+            max_fil = k
+            for i in range(k + 1, n_eq):
+                if abs(amat[i][k]) > max_val:
+                    max_val = abs(amat[i][k])
+                    max_fil = i
+            
+            # Intercambiar filas si es necesario
+            if max_fil != k:
+                amat[k], amat[max_fil] = amat[max_fil], amat[k]
+            
+            # Si el pivote es casi cero, marcar como singular y continuar
+            if abs(amat[k][k]) < 1e-9:
+                is_sngl = True
+                continue
+            
+            # Eliminar la variable actual de las ecuaciones siguientes
+            for i in range(k + 1, n_eq):
+                if abs(amat[i][k]) > 1e-9 and abs(amat[k][k]) > 1e-9:
+                    fact = amat[i][k] / amat[k][k]
+                    for j in range(k, n_var + 1):
+                        amat[i][j] -= fact * amat[k][j]
+        
+        if verbose:
+            print("\n--- Matriz después de la Eliminación Gaussiana ---")
+            for i in range(n_eq):
+                for j in range(n_var + 1):
+                    print(f"{amat[i][j]:.4f}\t", end="")
+                print()
+        
+        # Verificar si el sistema es incompatible
+        is_incn = False
+        for i in range(num_piv, n_eq):
+            all_z_cof = True
+            for j in range(n_var):
+                if abs(amat[i][j]) > 1e-9:
+                    all_z_cof = False
+                    break
+            
+            if all_z_cof and abs(amat[i][n_var]) > 1e-9:
+                is_incn = True
+                break
+        
+        if is_incn:
+            if verbose:
+                print("\nEl sistema es incompatible.")
+            return None, "incompatible"
+        elif is_sngl or n_eq < n_var:
+            if verbose:
+                print("\nEl sistema tiene infinitas soluciones.")
+            return None, "infinitas"
+        else:
+            # Sustitución hacia atrás
+            sol = [0.0] * n_var
+            try:
+                for i in range(n_var - 1, -1, -1):
+                    curr_sum = 0.0
+                    for j in range(i + 1, n_var):
+                        curr_sum += amat[i][j] * sol[j]
+                    
+                    if abs(amat[i][i]) < 1e-9:
+                        if verbose:
+                            print("\nEl sistema tiene infinitas soluciones o es incompatible.")
+                        return None, "infinitas"
+                    
+                    sol[i] = (amat[i][n_var] - curr_sum) / amat[i][i]
+                
+                if verbose:
+                    print("\n--- Soluciones ---")
+                    for i in range(n_var):
+                        print(f"Solución x_{i+1} = {sol[i]:.6f}")
+                
+                return sol, "unica"
+            
+            except Exception:
+                if verbose:
+                    print("\nError en el cálculo: El sistema tiene infinitas soluciones o es incompatible.")
+                return None, "indeterminado"
+    
     @staticmethod
     def resolver_sistema(coeficientes, terminos_independientes):
         """
@@ -986,6 +1106,8 @@ class AlgebraLineal:
                 
         return resultado
     
+
+
     @staticmethod
     def es_combinacion_lineal(vector, conjunto_vectores):
         """
