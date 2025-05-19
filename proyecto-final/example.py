@@ -132,6 +132,23 @@ def main():
     AL.graficar_vectores([[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 1]],
                         etiquetas=["Vector i", "Vector j", "Vector k", "Vector i+j+k"],
                         titulo="Vectores en 3D")
+    
+    print("\n17. Visualización de transformaciones lineales 2D:")
+    print("Mostrando transformación lineal en 2D (rotación 90°)...")
+    # Matriz de rotación 90 grados en sentido anti-horario
+    matriz_rotacion_90 = [[0, -1], [1, 0]]
+    AL.graficar_transformacion_lineal(matriz_rotacion_90, titulo="Rotación 90° Anti-horario")
+    
+    print("\n18. Visualización de transformaciones lineales 3D:")
+    print("Mostrando transformación lineal en 3D (rotación alrededor del eje Z)...")
+    # Matriz de rotación 45 grados alrededor del eje Z
+    angulo = math.pi/4  # 45 grados
+    matriz_rotacion_z = [
+        [math.cos(angulo), -math.sin(angulo), 0],
+        [math.sin(angulo), math.cos(angulo), 0],
+        [0, 0, 1]
+    ]
+    AL.graficar_transformacion_lineal_3d(matriz_rotacion_z, titulo="Rotación 45° alrededor del eje Z")
 
 
 if __name__ == "__main__":
