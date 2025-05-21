@@ -1075,8 +1075,8 @@ class AlgebraLineal:
         Returns:
             tuple: (solucion, tipo_solucion)
                   - solucion: Lista con la solución única, ejemplo de solución (sistema compatible indeterminado),
-                             o None (sistema incompatible)
-                  - tipo_solucion: String indicando el tipo de solución ("unica", "infinitas", "incompatible")
+                             o None (sistema sin solucion)
+                  - tipo_solucion: String indicando el tipo de solución ("unica", "infinitas", "sin solucion")
             
         Example:
             resultado, tipo = AlgebraLineal.gauss_jordan([[1, 1, 1, 6], [2, -1, 3, 9], [3, 2, -4, 3]])
@@ -1127,11 +1127,11 @@ class AlgebraLineal:
                         matriz[i][j] -= factor * matriz[fila_actual][j]
             
             fila_actual += 1
-          # Verificar si el sistema es incompatible
+          # Verificar si el sistema es sin solucion
         for i in range(fila_actual, filas):
             # Si hay una fila con todos ceros excepto el término independiente
             if all(abs(matriz[i][j]) < AlgebraLineal.TOLERANCIA for j in range(n_variables)) and abs(matriz[i][n_variables]) > AlgebraLineal.TOLERANCIA:
-                return None, "incompatible"
+                return None, "sin solucion"
         
         # Verificar si el sistema tiene infinitas soluciones
         if fila_actual < n_variables:
@@ -1153,7 +1153,7 @@ class AlgebraLineal:
         Returns:
             tuple: (solucion, tipo_solucion)
                   - solucion: Lista con la solución si es única, None en caso contrario
-                  - tipo_solucion: String indicando el tipo de solución ("unica", "infinitas", "incompatible")
+                  - tipo_solucion: String indicando el tipo de solución ("unica", "infinitas", "sin solucion")
         
         Example:
             solucion, tipo = AlgebraLineal.gauss([[1, 1, 1, 6], [2, -1, 3, 9], [3, 2, -4, 3]])
@@ -1210,7 +1210,7 @@ class AlgebraLineal:
                     print(f"{amat[i][j]:.4f}\t", end="")
                 print()
         
-        # Verificar si el sistema es incompatible
+        # Verificar si el sistema es sin solucion
         is_incn = False
         for i in range(num_piv, n_eq):
             all_z_cof = True
@@ -1225,8 +1225,8 @@ class AlgebraLineal:
         
         if is_incn:
             if verbose:
-                print("\nEl sistema es incompatible.")
-            return None, "incompatible"
+                print("\nEl sistema es sin solucion.")
+            return None, "sin solucion"
         elif is_sngl or n_eq < n_var:
             if verbose:
                 print("\nEl sistema tiene infinitas soluciones.")
@@ -1242,7 +1242,7 @@ class AlgebraLineal:
                     
                     if abs(amat[i][i]) < AlgebraLineal.TOLERANCIA:
                         if verbose:
-                            print("\nEl sistema tiene infinitas soluciones o es incompatible.")
+                            print("\nEl sistema tiene infinitas soluciones o es sin solucion.")
                         return None, "infinitas"
                     
                     sol[i] = (amat[i][n_var] - curr_sum) / amat[i][i]
@@ -1256,7 +1256,7 @@ class AlgebraLineal:
             
             except Exception:
                 if verbose:
-                    print("\nError en el cálculo: El sistema tiene infinitas soluciones o es incompatible.")
+                    print("\nError en el cálculo: El sistema tiene infinitas soluciones o es sin solucion.")
                 return None, "indeterminado"
     
     @staticmethod
@@ -1463,7 +1463,7 @@ class AlgebraLineal:
         # Resolver el sistema
         solucion, tipo = AlgebraLineal.resolver_sistema(coeficientes, terminos_independientes)
         
-        if tipo == "incompatible":
+        if tipo == "sin solucion":
             return False, "El vector no es combinación lineal del conjunto dado."
         
         # Verificar la solución reconstruyendo el vector

@@ -151,6 +151,7 @@ def main():
     ]
     # AL.graficar_transformacion_lineal_3d(matriz_rotacion_z, titulo="Rotación 45° alrededor del eje Z")
 
+    AL.es_linealmente_independiente
 
 if __name__ == "__main__":
     main()

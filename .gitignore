@@ -64,3 +64,9 @@ proyecto/__pycache__/
 
 formulario-2.pdf
 
+# pdf
+*.pdf
+*.pdfsync
+
+
+
