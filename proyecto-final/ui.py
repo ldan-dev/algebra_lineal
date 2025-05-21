@@ -263,10 +263,8 @@ class AlgebraLinealGUI:
             ],
             "Análisis Lineal": [
                 "calcular_rango", "es_linealmente_independiente", "combinacion_lineal", "es_combinacion_lineal"
-            ],
-            "Visualización": [
-                "graficar_funcion", "graficar_vectores", "graficar_transformacion_lineal", 
-                "graficar_transformacion_lineal_3d"
+            ],            "Visualización": [
+                "graficar_funcion", "graficar_vectores"
             ]
         }
         
@@ -600,83 +598,6 @@ class AlgebraLinealGUI:
             )
             mostrar_ejes_check.pack(side=tk.LEFT)
             
-        elif method_name == "graficar_transformacion_lineal":
-            param_widgets["matriz"] = MatrixEntryFrame(params_frame, "Matriz de Transformación", initial_rows=2, initial_cols=2)
-            param_widgets["matriz"].pack(fill=tk.X, pady=5)
-            
-            # Grid lines
-            grid_lines_frame = ttk.Frame(params_frame)
-            grid_lines_frame.pack(fill=tk.X, pady=5)
-            ttk.Label(grid_lines_frame, text="Líneas de cuadrícula:").pack(side=tk.LEFT, padx=(0, 5))
-            param_widgets["grid_lines"] = ttk.Spinbox(grid_lines_frame, from_=2, to=20, width=5)
-            param_widgets["grid_lines"].pack(side=tk.LEFT)
-            param_widgets["grid_lines"].insert(0, "10")
-            
-            # Título
-            titulo_frame = ttk.Frame(params_frame)
-            titulo_frame.pack(fill=tk.X, pady=5)
-            ttk.Label(titulo_frame, text="Título:").pack(side=tk.LEFT, padx=(0, 5))
-            param_widgets["titulo"] = ttk.Entry(titulo_frame, width=30)
-            param_widgets["titulo"].pack(side=tk.LEFT)
-            param_widgets["titulo"].insert(0, "Transformación Lineal")
-            
-            # Mostrar etiquetas
-            mostrar_etiquetas_frame = ttk.Frame(params_frame)
-            mostrar_etiquetas_frame.pack(fill=tk.X, pady=5)
-            param_widgets["mostrar_etiquetas"] = tk.BooleanVar(value=True)
-            mostrar_etiquetas_check = ttk.Checkbutton(
-                mostrar_etiquetas_frame, 
-                text="Mostrar etiquetas", 
-                variable=param_widgets["mostrar_etiquetas"]
-            )
-            mostrar_etiquetas_check.pack(side=tk.LEFT)
-            
-            # Tamaño de figura
-            figsize_frame = ttk.Frame(params_frame)
-            figsize_frame.pack(fill=tk.X, pady=5)
-            ttk.Label(figsize_frame, text="Tamaño de figura (ancho,alto):").pack(side=tk.LEFT, padx=(0, 5))
-            param_widgets["figsize"] = ttk.Entry(figsize_frame, width=10)
-            param_widgets["figsize"].pack(side=tk.LEFT)
-            param_widgets["figsize"].insert(0, "12,6")
-            
-        elif method_name == "graficar_transformacion_lineal_3d":
-            param_widgets["matriz"] = MatrixEntryFrame(params_frame, "Matriz de Transformación", initial_rows=3, initial_cols=3)
-            param_widgets["matriz"].pack(fill=tk.X, pady=5)
-            
-            # Grid lines
-            grid_lines_frame = ttk.Frame(params_frame)
-            grid_lines_frame.pack(fill=tk.X, pady=5)
-            ttk.Label(grid_lines_frame, text="Líneas de cuadrícula:").pack(side=tk.LEFT, padx=(0, 5))
-            param_widgets["grid_lines"] = ttk.Spinbox(grid_lines_frame, from_=2, to=20, width=5)
-            param_widgets["grid_lines"].pack(side=tk.LEFT)
-            param_widgets["grid_lines"].insert(0, "5")
-            
-            # Título
-            titulo_frame = ttk.Frame(params_frame)
-            titulo_frame.pack(fill=tk.X, pady=5)
-            ttk.Label(titulo_frame, text="Título:").pack(side=tk.LEFT, padx=(0, 5))
-            param_widgets["titulo"] = ttk.Entry(titulo_frame, width=30)
-            param_widgets["titulo"].pack(side=tk.LEFT)
-            param_widgets["titulo"].insert(0, "Transformación Lineal 3D")
-            
-            # Mostrar etiquetas
-            mostrar_etiquetas_frame = ttk.Frame(params_frame)
-            mostrar_etiquetas_frame.pack(fill=tk.X, pady=5)
-            param_widgets["mostrar_etiquetas"] = tk.BooleanVar(value=True)
-            mostrar_etiquetas_check = ttk.Checkbutton(
-                mostrar_etiquetas_frame, 
-                text="Mostrar etiquetas", 
-                variable=param_widgets["mostrar_etiquetas"]
-            )
-            mostrar_etiquetas_check.pack(side=tk.LEFT)
-            
-            # Tamaño de figura
-            figsize_frame = ttk.Frame(params_frame)
-            figsize_frame.pack(fill=tk.X, pady=5)
-            ttk.Label(figsize_frame, text="Tamaño de figura (ancho,alto):").pack(side=tk.LEFT, padx=(0, 5))
-            param_widgets["figsize"] = ttk.Entry(figsize_frame, width=10)
-            param_widgets["figsize"].pack(side=tk.LEFT)
-            param_widgets["figsize"].insert(0, "15,7")
         
         # Botón para ejecutar el método
         execute_button = ttk.Button(
@@ -795,28 +716,6 @@ class AlgebraLinealGUI:
                 
                 args["titulo"] = param_widgets["titulo"].get()
                 args["mostrar_ejes"] = param_widgets["mostrar_ejes"].get()
-            
-            elif method_name == "graficar_transformacion_lineal":
-                args["matriz"] = param_widgets["matriz"].get_matrix()
-                args["grid_lines"] = int(param_widgets["grid_lines"].get())
-                args["titulo"] = param_widgets["titulo"].get()
-                args["mostrar_etiquetas"] = param_widgets["mostrar_etiquetas"].get()
-                
-                # Procesar figsize
-                figsize_str = param_widgets["figsize"].get()
-                if figsize_str.strip():
-                    args["figsize"] = tuple(map(float, figsize_str.split(",")))
-            
-            elif method_name == "graficar_transformacion_lineal_3d":
-                args["matriz"] = param_widgets["matriz"].get_matrix()
-                args["grid_lines"] = int(param_widgets["grid_lines"].get())
-                args["titulo"] = param_widgets["titulo"].get()
-                args["mostrar_etiquetas"] = param_widgets["mostrar_etiquetas"].get()
-                
-                # Procesar figsize
-                figsize_str = param_widgets["figsize"].get()
-                if figsize_str.strip():
-                    args["figsize"] = tuple(map(float, figsize_str.split(",")))
             
             # Verificar que todos los argumentos necesarios están presentes
             if None in args.values():
