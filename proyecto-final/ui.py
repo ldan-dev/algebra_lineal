@@ -199,16 +199,33 @@ class AlgebraLinealGUI:
         self.root.title("Álgebra Lineal - Leonardo Daniel Aviña Neri")
         self.root.geometry("1200x700")
         self.root.minsize(1000, 600)
-        
-        # Configurar el estilo
+          # Configurar el estilo
         self.style = ttk.Style()
-        self.style.configure("TFrame", background="#f5f5f5")
-        self.style.configure("TButton", font=("Arial", 10))
-        self.style.configure("TLabel", font=("Arial", 10))
-        self.style.configure("Title.TLabel", font=("Arial", 14, "bold"))
-        self.style.configure("Header.TLabel", font=("Arial", 12, "bold"))
+        # Definir colores
+        self.bg_color = "#D6E5F3"  # Azul pastel oscuro 174d87
+        self.button_color = "#b2dafa"  # Azul claro pastel
+        self.execute_button_color = "#FFD966"  # Amarillo
+        self.text_color = "#000000"  # Negro para texto
+        self.text_color_contrast = "#ffffff"  # blanco para texto
+          # Aplicar estilos
+        self.style.configure("TFrame", background=self.bg_color)
+        self.style.configure("TButton", font=("Arial", 10), background=self.button_color, foreground=self.text_color)
+        self.style.configure("TLabel", font=("Arial", 10), background=self.bg_color, foreground=self.text_color)
+        self.style.configure("Title.TLabel", font=("Arial", 14, "bold"), background=self.bg_color, foreground=self.text_color)
+        self.style.configure("Header.TLabel", font=("Arial", 12, "bold"), background=self.bg_color, foreground=self.text_color)
+        self.style.configure("Execute.TButton", font=("Arial", 10, "bold"), background=self.execute_button_color, foreground=self.text_color)
         
-        # Crear el contenedor principal
+        # Mapeo de estados para botones
+        self.style.map("TButton",
+                  background=[("active", self.button_color)],
+                  foreground=[("active", self.text_color)])
+        self.style.map("Execute.TButton",
+                  background=[("active", self.execute_button_color)],
+                  foreground=[("active", self.text_color)])
+        
+        # Configurar el color de fondo de la ventana principal
+        self.root.configure(background=self.bg_color)
+          # Crear el contenedor principal
         main_frame = ttk.Frame(root)
         main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
@@ -220,7 +237,7 @@ class AlgebraLinealGUI:
         try:
             logo_path = os.path.join(os.path.dirname(__file__), "assets", "logo.png")
             logo_image = Image.open(logo_path)
-            logo_image = logo_image.resize((100, 100))  # Ajustar tamaño
+            logo_image = logo_image.resize((200, 200))  # Ajustar tamaño
             self.logo_photo = ImageTk.PhotoImage(logo_image)
             logo_label = ttk.Label(header_frame, image=self.logo_photo)
             logo_label.pack(side=tk.RIGHT, padx=10)
@@ -228,9 +245,9 @@ class AlgebraLinealGUI:
             print(f"Error al cargar el logo: {e}")
         
         # Título
-        title_label = ttk.Label(header_frame, text="Álgebra Lineal - Interfaz Gráfica", style="Title.TLabel")
+        title_label = ttk.Label(header_frame, text="Álgebra Lineal Proyecto Final", style="Title.TLabel")
         title_label.pack(side=tk.LEFT, padx=10)
-        author_label = ttk.Label(header_frame, text="Leonardo Daniel Aviña Neri")
+        author_label = ttk.Label(header_frame, text="Leonardo Daniel Aviña Neri\n Emmanuel Vargas Cisneros")
         author_label.pack(side=tk.LEFT, padx=10)
         
         # Paneles principales
@@ -274,13 +291,19 @@ class AlgebraLinealGUI:
             frame = ttk.Frame(self.category_notebook)
             self.category_frames[category] = frame
             self.category_notebook.add(frame, text=category)
-            
-            # Crear botones para cada método
+              # Crear botones para cada método
             for method in methods:
-                method_button = ttk.Button(
+                method_button = tk.Button(
                     frame, 
                     text=method.replace("_", " ").title(),
-                    command=lambda m=method: self.show_method_interface(m)
+                    command=lambda m=method: self.show_method_interface(m),
+                    bg=self.button_color,
+                    fg=self.text_color,
+                    activebackground=self.button_color,
+                    activeforeground=self.text_color,
+                    font=("Arial", 10),
+                    relief=tk.RAISED,
+                    borderwidth=2
                 )
                 method_button.pack(fill=tk.X, pady=2)
         
@@ -301,8 +324,7 @@ class AlgebraLinealGUI:
         results_paned.add(result_frame, weight=1)
         
         ttk.Label(result_frame, text="Resultado", style="Header.TLabel").pack(fill=tk.X)
-        
-        self.result_text = scrolledtext.ScrolledText(result_frame, height=10)
+        self.result_text = scrolledtext.ScrolledText(result_frame, height=10, bg=self.bg_color, fg=self.text_color)
         self.result_text.pack(fill=tk.BOTH, expand=True)
         self.result_text.configure(state="disabled")
         
@@ -312,7 +334,7 @@ class AlgebraLinealGUI:
         
         ttk.Label(console_frame, text="Mensajes de salida", style="Header.TLabel").pack(fill=tk.X)
         
-        self.console_text = scrolledtext.ScrolledText(console_frame, height=10)
+        self.console_text = scrolledtext.ScrolledText(console_frame, height=10, bg=self.bg_color, fg=self.text_color)
         self.console_text.pack(fill=tk.BOTH, expand=True)
         self.console_text.configure(state="disabled")
         
@@ -367,10 +389,9 @@ class AlgebraLinealGUI:
         # Descripción del método
         description_frame = ttk.Frame(self.current_method_frame)
         description_frame.pack(fill=tk.X, pady=(0, 10))
-        
-        # Extraer la primera parte del docstring como descripción breve
+          # Extraer la primera parte del docstring como descripción breve
         description = doc.split("\n\n")[0] if "\n\n" in doc else doc
-        description_text = scrolledtext.ScrolledText(description_frame, height=3, wrap=tk.WORD)
+        description_text = scrolledtext.ScrolledText(description_frame, height=3, wrap=tk.WORD, bg=self.bg_color, fg=self.text_color)
         description_text.pack(fill=tk.X)
         description_text.insert(tk.END, description)
         description_text.configure(state="disabled")
@@ -598,11 +619,11 @@ class AlgebraLinealGUI:
             )
             mostrar_ejes_check.pack(side=tk.LEFT)
             
-        
-        # Botón para ejecutar el método
+          # Botón para ejecutar el método
         execute_button = ttk.Button(
             self.current_method_frame,
             text="Ejecutar",
+            style="Execute.TButton",
             command=lambda: self.execute_method(method_name, param_widgets)
         )
         execute_button.pack(pady=10)
