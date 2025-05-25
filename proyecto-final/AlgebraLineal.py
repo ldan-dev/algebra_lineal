@@ -15,6 +15,7 @@ import math
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
+from fractions import Fraction
 
 class AlgebraLineal:
     """
@@ -341,6 +342,148 @@ class AlgebraLineal:
         escalar = AlgebraLineal.producto_escalar(v1, v2) / norma_v2_cuadrado
         return AlgebraLineal.escalar_por_vector(escalar, v2)
     
+    @staticmethod
+    def transformacion_lineal(base_dominio, base_codominio):
+        """
+        Calcula la matriz de una transformación lineal dado un conjunto de vectores
+        de la base del dominio y sus correspondientes imágenes en el codominio.
+        
+        Args:
+            base_dominio (list): Lista de vectores que forman una base del dominio
+            base_codominio (list): Lista de vectores que son las imágenes de los vectores de la base
+            
+        Returns:
+            list: Matriz de la transformación lineal
+            
+        Raises:
+            ValueError: Si los vectores no tienen dimensiones adecuadas o no forman una base
+            
+        Example:
+            matriz = AlgebraLineal.transformacion_lineal([[1, 0], [0, 1]], [[2, 1], [0, 3]])
+            # Retorna: [[2, 0], [1, 3]]
+        """
+        
+        # Validación de entrada
+        if not base_dominio or not base_codominio:
+            raise ValueError("Las bases del dominio y codominio no pueden estar vacías")
+            
+        n_vec = len(base_dominio)
+        if len(base_codominio) != n_vec:
+            raise ValueError("Las bases del dominio y codominio deben tener el mismo número de vectores")
+        
+        # Convertir a fracciones para cálculos exactos
+        vec_V = [[Fraction(comp) for comp in vector] for vector in base_dominio]
+        vec_W = [[Fraction(comp) for comp in vector] for vector in base_codominio]
+        
+        dim_v = len(vec_V[0])
+        dim_w = len(vec_W[0])
+        
+        # Comprobar que todos los vectores tienen la dimensión correcta
+        if any(len(v) != dim_v for v in vec_V):
+            raise ValueError("Todos los vectores de la base del dominio deben tener la misma dimensión")
+        if any(len(w) != dim_w for w in vec_W):
+            raise ValueError("Todos los vectores de la base del codominio deben tener la misma dimensión")
+        
+        # Comprobar si n_vec == dim_v (condición para invertibilidad)
+        if n_vec != dim_v:
+            raise ValueError("La cantidad de vectores debe ser igual a su dimensión para formar una base invertible")
+        
+        # Crear matriz aumentada para inversión
+        neq_cl = dim_v
+        nvar_c = n_vec
+        tot_cl = nvar_c + neq_cl
+        
+        mat_A = [[Fraction(0) for _ in range(tot_cl)] for _ in range(neq_cl)]
+        
+        # Llenar la matriz aumentada
+        for i_mat in range(neq_cl):
+            for j_mat in range(nvar_c):
+                mat_A[i_mat][j_mat] = vec_V[j_mat][i_mat]
+            mat_A[i_mat][nvar_c + i_mat] = Fraction(1)
+        
+        # Tolerancia para valores cercanos a cero
+        tol_0 = Fraction(1, 10**9)
+        
+        # Eliminación gaussiana
+        cur_pv = 0
+        piv_cl = []
+        for k_col in range(nvar_c):
+            if cur_pv >= neq_cl:
+                break
+            
+            max_vl = abs(mat_A[cur_pv][k_col])
+            max_fl = cur_pv
+            
+            for i_fil in range(cur_pv + 1, neq_cl):
+                if abs(mat_A[i_fil][k_col]) > max_vl:
+                    max_vl = abs(mat_A[i_fil][k_col])
+                    max_fl = i_fil
+            
+            if max_vl > tol_0:
+                if max_fl != cur_pv:
+                    mat_A[cur_pv], mat_A[max_fl] = mat_A[max_fl], mat_A[cur_pv]
+                
+                piv_cl.append(k_col)
+                
+                for i_row in range(cur_pv + 1, neq_cl):
+                    if abs(mat_A[i_row][k_col]) > tol_0:
+                        factr = mat_A[i_row][k_col] / mat_A[cur_pv][k_col]
+                        for j_idx in range(k_col, tot_cl):
+                            mat_A[i_row][j_idx] -= factr * mat_A[cur_pv][j_idx]
+                cur_pv += 1
+        
+        # Verificar si la matriz es invertible
+        if len(piv_cl) < nvar_c:
+            raise ValueError("Los vectores de la base no son linealmente independientes. No puede encontrarse una única matriz de transformación.")
+        
+        # Finalizar eliminación gaussiana (sustitución hacia atrás)
+        for i_pvt in range(len(piv_cl) - 1, -1, -1):
+            piv_co = piv_cl[i_pvt]
+            piv_vl = mat_A[i_pvt][piv_co]
+            
+            for j_idx in range(piv_co, tot_cl):
+                mat_A[i_pvt][j_idx] /= piv_vl
+            
+            for r_abv in range(i_pvt):
+                factr = mat_A[r_abv][piv_co]
+                for j_idx in range(piv_co, tot_cl):
+                    mat_A[r_abv][j_idx] -= factr * mat_A[i_pvt][j_idx]
+        
+        # Extraer matriz inversa
+        inv_V = []
+        for i_inv in range(neq_cl):
+            row_i = []
+            for j_inv in range(nvar_c, tot_cl):
+                row_i.append(mat_A[i_inv][j_inv])
+            inv_V.append(row_i)
+        
+        # Calcular la matriz de transformación
+        fil_T = dim_w
+        col_T = n_vec
+        
+        mat_T = [[Fraction(0) for _ in range(col_T)] for _ in range(fil_T)]
+        
+        for i_fil in range(fil_T):
+            for j_col in range(col_T):
+                suma_mul = Fraction(0)
+                for k_idx in range(n_vec):
+                    suma_mul += vec_W[k_idx][i_fil] * inv_V[k_idx][j_col]
+                mat_T[i_fil][j_col] = suma_mul
+        
+        # Convertir fracciones a float para facilitar su uso
+        result_matrix = []
+        for row in mat_T:
+            result_row = []
+            for elem in row:
+                # Si es entero, devolver el entero, sino la fracción
+                if elem.denominator == 1:
+                    result_row.append(int(elem.numerator))
+                else:
+                    result_row.append(float(elem))
+            result_matrix.append(result_row)
+        
+        return result_matrix
+
     # ======================== OPERACIONES CON MATRICES ========================
     
     @staticmethod
@@ -831,6 +974,8 @@ class AlgebraLineal:
             ax.set_title(titulo)
             plt.show()
     
+    
+
     @staticmethod
     def graficar_transformacion_lineal(matriz, grid_lines=10, titulo="Transformación Lineal", mostrar_etiquetas=True, figsize=(12, 6)):
         """
