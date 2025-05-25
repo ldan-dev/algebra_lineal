@@ -277,11 +277,10 @@ class AlgebraLinealGUI:
             ],
             "Sistemas": [
                 "gauss_jordan", "gauss", "resolver_sistema"
-            ],
-            "Análisis Lineal": [
-                "calcular_rango", "es_linealmente_independiente", "combinacion_lineal", "es_combinacion_lineal"
+            ],            "Análisis Lineal": [
+                "calcular_rango", "es_linealmente_independiente", "combinacion_lineal", "es_combinacion_lineal", "transformacion_lineal"
             ],            "Visualización": [
-                "graficar_funcion", "graficar_vectores"
+                "graficar_funcion", "graficar_vectores", "visualizar_transformacion_lineal"
             ]
         }
         
@@ -520,6 +519,47 @@ class AlgebraLinealGUI:
             param_widgets["conjunto_vectores"] = MatrixEntryFrame(params_frame, "Conjunto de Vectores (cada columna es un vector)")
             param_widgets["conjunto_vectores"].pack(fill=tk.X, pady=5)
         
+        elif method_name == "transformacion_lineal":
+            param_widgets["base_dominio"] = MatrixEntryFrame(params_frame, "Base del Dominio (cada fila es un vector)")
+            param_widgets["base_dominio"].pack(fill=tk.X, pady=5)
+            param_widgets["base_codominio"] = MatrixEntryFrame(params_frame, "Base del Codominio (cada fila es un vector)")
+            param_widgets["base_codominio"].pack(fill=tk.X, pady=5)
+        
+        elif method_name == "visualizar_transformacion_lineal":
+            param_widgets["matriz_transformacion"] = MatrixEntryFrame(params_frame, "Matriz de Transformación")
+            param_widgets["matriz_transformacion"].pack(fill=tk.X, pady=5)
+            
+            titulo_frame = ttk.Frame(params_frame)
+            titulo_frame.pack(fill=tk.X, pady=5)
+            ttk.Label(titulo_frame, text="Título:").pack(side=tk.LEFT, padx=(0, 5))
+            param_widgets["titulo"] = ttk.Entry(titulo_frame, width=30)
+            param_widgets["titulo"].pack(side=tk.LEFT)
+            param_widgets["titulo"].insert(0, "Visualización de Transformación Lineal")
+            
+            grid_frame = ttk.Frame(params_frame)
+            grid_frame.pack(fill=tk.X, pady=5)
+            ttk.Label(grid_frame, text="Líneas de cuadrícula:").pack(side=tk.LEFT, padx=(0, 5))
+            param_widgets["grid_lines"] = ttk.Spinbox(grid_frame, from_=5, to=20, width=5)
+            param_widgets["grid_lines"].pack(side=tk.LEFT)
+            param_widgets["grid_lines"].insert(0, "10")
+            
+            mostrar_detalle_frame = ttk.Frame(params_frame)
+            mostrar_detalle_frame.pack(fill=tk.X, pady=5)
+            param_widgets["mostrar_detalle"] = tk.BooleanVar(value=True)
+            mostrar_detalle_check = ttk.Checkbutton(
+                mostrar_detalle_frame, 
+                text="Mostrar detalles", 
+                variable=param_widgets["mostrar_detalle"]
+            )
+            mostrar_detalle_check.pack(side=tk.LEFT)
+            
+            figsize_frame = ttk.Frame(params_frame)
+            figsize_frame.pack(fill=tk.X, pady=5)
+            ttk.Label(figsize_frame, text="Tamaño de figura (ancho, alto):").pack(side=tk.LEFT, padx=(0, 5))
+            param_widgets["figsize"] = ttk.Entry(figsize_frame, width=10)
+            param_widgets["figsize"].pack(side=tk.LEFT)
+            param_widgets["figsize"].insert(0, "12, 6")
+        
         elif method_name == "graficar_funcion":
             # Para la función, creamos un frame especial
             function_frame = ttk.Frame(params_frame)
@@ -622,9 +662,9 @@ class AlgebraLinealGUI:
           # Botón para ejecutar el método
         execute_button = ttk.Button(
             self.current_method_frame,
-            text="Ejecutar",
-            style="Execute.TButton",
-            command=lambda: self.execute_method(method_name, param_widgets)
+            text=f"Ejecutar {method_name.replace('_', ' ').title()}",
+            command=lambda: self.execute_method(method_name, param_widgets),
+            style="Execute.TButton"
         )
         execute_button.pack(pady=10)
     
@@ -705,6 +745,35 @@ class AlgebraLinealGUI:
                 args["vector"] = param_widgets["vector"].get_vector()
                 matriz = param_widgets["conjunto_vectores"].get_matrix()
                 args["conjunto_vectores"] = [list(x) for x in zip(*matriz)]
+            
+            elif method_name == "transformacion_lineal":
+                # Get matrices and transpose to get vectors as rows
+                base_dominio_matrix = param_widgets["base_dominio"].get_matrix()
+                base_codominio_matrix = param_widgets["base_codominio"].get_matrix()
+                
+                # For transformacion_lineal, each row is a vector
+                args["base_dominio"] = base_dominio_matrix
+                args["base_codominio"] = base_codominio_matrix
+            
+            elif method_name == "visualizar_transformacion_lineal":
+                args["matriz_transformacion"] = param_widgets["matriz_transformacion"].get_matrix()
+                args["titulo"] = param_widgets["titulo"].get()
+                
+                # Parse grid_lines
+                try:
+                    args["grid_lines"] = int(param_widgets["grid_lines"].get())
+                except ValueError:
+                    args["grid_lines"] = 10
+                
+                # Parse figsize
+                try:
+                    figsize_str = param_widgets["figsize"].get()
+                    width, height = map(float, figsize_str.replace(" ", "").split(","))
+                    args["figsize"] = (width, height)
+                except:
+                    args["figsize"] = (12, 6)
+                
+                args["mostrar_detalle"] = param_widgets["mostrar_detalle"].get()
             
             elif method_name == "graficar_funcion":
                 # Crear una función a partir de la cadena
@@ -803,4 +872,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
