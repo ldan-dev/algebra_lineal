@@ -6,7 +6,7 @@ Universidad de Guanajuato - Campus Irapuato-Salamanca
 Correo: ld.avinaneri@ugto.mx
 UDA: Álgebra Lineal
 DESCRIPCION: Interfaz gráfica para utilizar los métodos de la clase AlgebraLineal
-    sin necesidad de escribir código.
+             sin necesidad de escribir código.
 """
 
 import os
@@ -91,6 +91,7 @@ class VectorEntryFrame(ttk.Frame):
             entry.pack(side=tk.LEFT, padx=(0, 5))
             entry.insert(0, "0")
             self.entries.append(entry)
+    
     def get_vector(self):
         """Devuelve el vector como una lista de números (como objetos Fraction)"""
         try:
@@ -159,6 +160,7 @@ class MatrixEntryFrame(ttk.Frame):
                 row_entries.append(entry)
             
             self.entries.append(row_entries)
+    
     def get_matrix(self):
         """Devuelve la matriz como una lista de listas (con elementos como objetos Fraction)"""
         try:
@@ -181,6 +183,7 @@ class ScalarEntryFrame(ttk.Frame):
         self.entry = ttk.Entry(self, width=10)
         self.entry.pack(side=tk.LEFT)
         self.entry.insert(0, "1")
+    
     def get_value(self):
         """Devuelve el valor escalar como un objeto Fraction"""
         try:
@@ -199,7 +202,8 @@ class AlgebraLinealGUI:
         self.root.title("Álgebra Lineal - Leonardo Daniel Aviña Neri")
         self.root.geometry("1200x700")
         self.root.minsize(1000, 600)
-          # Configurar el estilo
+        
+        # Configurar el estilo
         self.style = ttk.Style()
         # Definir colores
         self.bg_color = "#D6E5F3"  # Azul pastel oscuro 174d87
@@ -207,7 +211,8 @@ class AlgebraLinealGUI:
         self.execute_button_color = "#FFD966"  # Amarillo
         self.text_color = "#000000"  # Negro para texto
         self.text_color_contrast = "#ffffff"  # blanco para texto
-          # Aplicar estilos
+        
+        # Aplicar estilos
         self.style.configure("TFrame", background=self.bg_color)
         self.style.configure("TButton", font=("Arial", 10), background=self.button_color, foreground=self.text_color)
         self.style.configure("TLabel", font=("Arial", 10), background=self.bg_color, foreground=self.text_color)
@@ -225,7 +230,8 @@ class AlgebraLinealGUI:
         
         # Configurar el color de fondo de la ventana principal
         self.root.configure(background=self.bg_color)
-          # Crear el contenedor principal
+        
+        # Crear el contenedor principal
         main_frame = ttk.Frame(root)
         main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
@@ -277,9 +283,11 @@ class AlgebraLinealGUI:
             ],
             "Sistemas": [
                 "gauss_jordan", "gauss", "resolver_sistema"
-            ],            "Análisis Lineal": [
+            ],
+            "Análisis Lineal": [
                 "calcular_rango", "es_linealmente_independiente", "combinacion_lineal", "es_combinacion_lineal", "transformacion_lineal"
-            ],            "Visualización": [
+            ],
+            "Visualización": [
                 "graficar_funcion", "graficar_vectores", "visualizar_transformacion_lineal"
             ]
         }
@@ -290,7 +298,8 @@ class AlgebraLinealGUI:
             frame = ttk.Frame(self.category_notebook)
             self.category_frames[category] = frame
             self.category_notebook.add(frame, text=category)
-              # Crear botones para cada método
+            
+            # Crear botones para cada método
             for method in methods:
                 method_button = tk.Button(
                     frame, 
@@ -388,7 +397,8 @@ class AlgebraLinealGUI:
         # Descripción del método
         description_frame = ttk.Frame(self.current_method_frame)
         description_frame.pack(fill=tk.X, pady=(0, 10))
-          # Extraer la primera parte del docstring como descripción breve
+        
+        # Extraer la primera parte del docstring como descripción breve
         description = doc.split("\n\n")[0] if "\n\n" in doc else doc
         description_text = scrolledtext.ScrolledText(description_frame, height=3, wrap=tk.WORD, bg=self.bg_color, fg=self.text_color)
         description_text.pack(fill=tk.X)
@@ -658,8 +668,8 @@ class AlgebraLinealGUI:
                 variable=param_widgets["mostrar_ejes"]
             )
             mostrar_ejes_check.pack(side=tk.LEFT)
-            
-          # Botón para ejecutar el método
+        
+        # Botón para ejecutar el método
         execute_button = ttk.Button(
             self.current_method_frame,
             text=f"Ejecutar {method_name.replace('_', ' ').title()}",
@@ -815,7 +825,8 @@ class AlgebraLinealGUI:
             # Ejecutar el método
             method = getattr(AlgebraLineal, method_name)
             result = method(**args)
-              # Mostrar el resultado
+            
+            # Mostrar el resultado
             if result is not None:
                 if method_name in ["es_linealmente_independiente", "es_combinacion_lineal"]:
                     # Estos métodos devuelven una tupla (booleano, explicación)
@@ -844,7 +855,8 @@ class AlgebraLinealGUI:
                 else:
                     # Para otros métodos, mostrar el resultado directamente
                     if isinstance(result, list):
-                        if isinstance(result[0], list):                            # Es una matriz
+                        if isinstance(result[0], list):
+                            # Es una matriz
                             result_str = "Resultado:\n"
                             for row in result:
                                 row_str = "["
@@ -875,9 +887,9 @@ class AlgebraLinealGUI:
                                 else:
                                     vec_str += f"{val}"
                                 
-                                    if j < len(result) - 1:
-                                        vec_str += ", "
-                                vec_str += "]"
+                                if j < len(result) - 1:
+                                    vec_str += ", "
+                            vec_str += "]"
                             result_str = f"Resultado: {vec_str}"
                     else:
                         # Formatear fracciones si es necesario

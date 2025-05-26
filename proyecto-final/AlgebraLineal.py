@@ -57,9 +57,13 @@ class AlgebraLineal:
         if len(v1) != len(v2):
             raise ValueError("Los vectores deben tener la misma dimensión")
         
-        resultado = 0
-        for i in range(len(v1)):
-            resultado += v1[i] * v2[i]
+        # Convertir a Fraction para mantener precisión exacta
+        v1_frac = [Fraction(elem) if not isinstance(elem, Fraction) else elem for elem in v1]
+        v2_frac = [Fraction(elem) if not isinstance(elem, Fraction) else elem for elem in v2]
+        
+        resultado = Fraction(0)
+        for i in range(len(v1_frac)):
+            resultado += v1_frac[i] * v2_frac[i]
         return resultado
     @staticmethod
     def producto_vectorial(v1, v2):
@@ -183,9 +187,13 @@ class AlgebraLineal:
         if len(v1) != len(v2):
             raise ValueError("Los vectores deben tener la misma dimensión")
         
+        # Convertir a Fraction para mantener precisión exacta
+        v1_frac = [Fraction(elem) if not isinstance(elem, Fraction) else elem for elem in v1]
+        v2_frac = [Fraction(elem) if not isinstance(elem, Fraction) else elem for elem in v2]
+        
         resultado = []
-        for i in range(len(v1)):
-            resultado.append(v1[i] + v2[i])
+        for i in range(len(v1_frac)):
+            resultado.append(v1_frac[i] + v2_frac[i])
         return resultado
     
     @staticmethod
@@ -210,9 +218,13 @@ class AlgebraLineal:
         if len(v1) != len(v2):
             raise ValueError("Los vectores deben tener la misma dimensión")
         
+        # Convertir a Fraction para mantener precisión exacta
+        v1_frac = [Fraction(elem) if not isinstance(elem, Fraction) else elem for elem in v1]
+        v2_frac = [Fraction(elem) if not isinstance(elem, Fraction) else elem for elem in v2]
+        
         resultado = []
-        for i in range(len(v1)):
-            resultado.append(v1[i] - v2[i])
+        for i in range(len(v1_frac)):
+            resultado.append(v1_frac[i] - v2_frac[i])
         return resultado
     
     @staticmethod
@@ -231,7 +243,11 @@ class AlgebraLineal:
             resultado = AlgebraLineal.escalar_por_vector(2, [1, 2, 3])
             # Retorna: [2, 4, 6]
         """
-        return [escalar * componente for componente in vector]
+        # Convertir a Fraction para mantener precisión exacta
+        escalar_frac = Fraction(escalar) if not isinstance(escalar, Fraction) else escalar
+        vector_frac = [Fraction(elem) if not isinstance(elem, Fraction) else elem for elem in vector]
+        
+        return [escalar_frac * componente for componente in vector_frac]
     
     @staticmethod
     def norma(vector):
@@ -248,7 +264,14 @@ class AlgebraLineal:
             resultado = AlgebraLineal.norma([3, 4])
             # Retorna: 5.0
         """
-        return math.sqrt(sum(x * x for x in vector))
+        # Convertir a Fraction para cálculos internos precisos
+        vector_frac = [Fraction(elem) if not isinstance(elem, Fraction) else elem for elem in vector]
+        
+        # Sumar los cuadrados
+        suma_cuadrados = sum(x * x for x in vector_frac)
+        
+        # Para la raíz cuadrada necesitamos convertir a float
+        return math.sqrt(float(suma_cuadrados))
     
     @staticmethod
     def normalizar(vector):
@@ -469,8 +492,7 @@ class AlgebraLineal:
                 for k_idx in range(n_vec):
                     suma_mul += vec_W[k_idx][i_fil] * inv_V[k_idx][j_col]
                 mat_T[i_fil][j_col] = suma_mul
-        
-        # Convertir fracciones a float para facilitar su uso
+        # Mantener las fracciones en el resultado para mayor precisión y legibilidad
         result_matrix = []
         for row in mat_T:
             result_row = []
@@ -479,13 +501,12 @@ class AlgebraLineal:
                 if elem.denominator == 1:
                     result_row.append(int(elem.numerator))
                 else:
-                    result_row.append(float(elem))
+                    result_row.append(elem)  # Mantener como Fraction
             result_matrix.append(result_row)
         
         return result_matrix
 
     # ======================== OPERACIONES CON MATRICES ========================
-    
     @staticmethod
     def crear_matriz(filas, columnas, valor_inicial=0):
         """
@@ -503,8 +524,9 @@ class AlgebraLineal:
             matriz = AlgebraLineal.crear_matriz(2, 3, 1)
             # Retorna: [[1, 1, 1], [1, 1, 1]]
         """
-        return [[valor_inicial for _ in range(columnas)] for _ in range(filas)]
-    
+        # Convertir el valor inicial a Fraction para mantener precisión exacta
+        valor_inicial_frac = Fraction(valor_inicial) if not isinstance(valor_inicial, Fraction) else valor_inicial
+        return [[valor_inicial_frac for _ in range(columnas)] for _ in range(filas)]
     @staticmethod
     def crear_matriz_identidad(n):
         """
@@ -520,11 +542,10 @@ class AlgebraLineal:
             matriz = AlgebraLineal.crear_matriz_identidad(3)
             # Retorna: [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
         """
-        identidad = AlgebraLineal.crear_matriz(n, n)
+        identidad = [[Fraction(0) for _ in range(n)] for _ in range(n)]
         for i in range(n):
-            identidad[i][i] = 1
+            identidad[i][i] = Fraction(1)
         return identidad
-    
     @staticmethod
     def suma_matrices(m1, m2):
         """
@@ -552,16 +573,19 @@ class AlgebraLineal:
             if len(m1[i]) != len(m2[i]):
                 raise ValueError("Las matrices deben tener las mismas dimensiones")
         
-        filas = len(m1)
-        columnas = len(m1[0])
-        resultado = AlgebraLineal.crear_matriz(filas, columnas)
+        # Convertir a Fraction para mantener precisión exacta
+        m1_frac = [[Fraction(elem) if not isinstance(elem, Fraction) else elem for elem in fila] for fila in m1]
+        m2_frac = [[Fraction(elem) if not isinstance(elem, Fraction) else elem for elem in fila] for fila in m2]
+        
+        filas = len(m1_frac)
+        columnas = len(m1_frac[0])
+        resultado = [[Fraction(0) for _ in range(columnas)] for _ in range(filas)]
         
         for i in range(filas):
             for j in range(columnas):
-                resultado[i][j] = m1[i][j] + m2[i][j]
+                resultado[i][j] = m1_frac[i][j] + m2_frac[i][j]
                 
         return resultado
-    
     
     @staticmethod
     def resta_matrices(m1, m2):
@@ -590,16 +614,19 @@ class AlgebraLineal:
             if len(m1[i]) != len(m2[i]):
                 raise ValueError("Las matrices deben tener las mismas dimensiones")
         
-        filas = len(m1)
-        columnas = len(m1[0])
-        resultado = AlgebraLineal.crear_matriz(filas, columnas)
+        # Convertir a Fraction para mantener precisión exacta
+        m1_frac = [[Fraction(elem) if not isinstance(elem, Fraction) else elem for elem in fila] for fila in m1]
+        m2_frac = [[Fraction(elem) if not isinstance(elem, Fraction) else elem for elem in fila] for fila in m2]
+        
+        filas = len(m1_frac)
+        columnas = len(m1_frac[0])
+        resultado = [[Fraction(0) for _ in range(columnas)] for _ in range(filas)]
         
         for i in range(filas):
             for j in range(columnas):
-                resultado[i][j] = m1[i][j] - m2[i][j]
+                resultado[i][j] = m1_frac[i][j] - m2_frac[i][j]
                 
         return resultado
-    
     @staticmethod
     def escalar_por_matriz(escalar, matriz):
         """
@@ -616,16 +643,19 @@ class AlgebraLineal:
             resultado = AlgebraLineal.escalar_por_matriz(2, [[1, 2], [3, 4]])
             # Retorna: [[2, 4], [6, 8]]
         """
-        filas = len(matriz)
-        columnas = len(matriz[0])
+        # Convertir a Fraction para mantener precisión exacta
+        escalar_frac = Fraction(escalar) if not isinstance(escalar, Fraction) else escalar
+        matriz_frac = [[Fraction(elem) if not isinstance(elem, Fraction) else elem for elem in fila] for fila in matriz]
+        
+        filas = len(matriz_frac)
+        columnas = len(matriz_frac[0])
         resultado = AlgebraLineal.crear_matriz(filas, columnas)
         
         for i in range(filas):
             for j in range(columnas):
-                resultado[i][j] = escalar * matriz[i][j]
+                resultado[i][j] = escalar_frac * matriz_frac[i][j]
                 
         return resultado
-    
     @staticmethod
     def mult_matrices(m1, m2):
         """
@@ -645,23 +675,26 @@ class AlgebraLineal:
             resultado = AlgebraLineal.mult_matrices([[1, 2], [3, 4]], [[5, 6], [7, 8]])
             # Retorna: [[19, 22], [43, 50]]
         """
-        filas_m1 = len(m1)
-        columnas_m1 = len(m1[0])
-        filas_m2 = len(m2)
+        # Convertir a Fraction para mantener precisión exacta
+        m1_frac = [[Fraction(elem) if not isinstance(elem, Fraction) else elem for elem in fila] for fila in m1]
+        m2_frac = [[Fraction(elem) if not isinstance(elem, Fraction) else elem for elem in fila] for fila in m2]
+        
+        filas_m1 = len(m1_frac)
+        columnas_m1 = len(m1_frac[0])
+        filas_m2 = len(m2_frac)
         
         if columnas_m1 != filas_m2:
             raise ValueError("Las dimensiones de las matrices no son compatibles para la multiplicación")
         
-        columnas_m2 = len(m2[0])
-        resultado = AlgebraLineal.crear_matriz(filas_m1, columnas_m2)
+        columnas_m2 = len(m2_frac[0])
+        resultado = [[Fraction(0) for _ in range(columnas_m2)] for _ in range(filas_m1)]
         
         for i in range(filas_m1):
             for j in range(columnas_m2):
                 for k in range(columnas_m1):
-                    resultado[i][j] += m1[i][k] * m2[k][j]
+                    resultado[i][j] += m1_frac[i][k] * m2_frac[k][j]
                     
         return resultado
-    
     @staticmethod
     def transpuesta(matriz):
         """
@@ -677,17 +710,19 @@ class AlgebraLineal:
             resultado = AlgebraLineal.transpuesta([[1, 2, 3], [4, 5, 6]])
             # Retorna: [[1, 4], [2, 5], [3, 6]]
         """
-        filas = len(matriz)
-        columnas = len(matriz[0])
+        # Convertir a Fraction para mantener precisión exacta
+        matriz_frac = [[Fraction(elem) if not isinstance(elem, Fraction) else elem for elem in fila] for fila in matriz]
         
-        transpuesta = AlgebraLineal.crear_matriz(columnas, filas)
+        filas = len(matriz_frac)
+        columnas = len(matriz_frac[0])
+        
+        transpuesta = [[Fraction(0) for _ in range(filas)] for _ in range(columnas)]
         
         for i in range(filas):
             for j in range(columnas):
-                transpuesta[j][i] = matriz[i][j]
+                transpuesta[j][i] = matriz_frac[i][j]
                 
         return transpuesta
-    
     @staticmethod
     def submatriz(matriz, fila_excluida, columna_excluida):
         """
@@ -705,9 +740,9 @@ class AlgebraLineal:
             resultado = AlgebraLineal.submatriz([[1, 2, 3], [4, 5, 6], [7, 8, 9]], 0, 0)
             # Retorna: [[5, 6], [8, 9]]
         """
+        # Mantener los valores originales, que pueden ser Fraction
         return [[matriz[i][j] for j in range(len(matriz[0])) if j != columna_excluida]
-                for i in range(len(matriz)) if i != fila_excluida]
-    @staticmethod
+                for i in range(len(matriz)) if i != fila_excluida]@staticmethod
     def determinante(matriz):
         """
         Calcula el determinante de una matriz.
@@ -733,25 +768,27 @@ class AlgebraLineal:
         if any(len(fila) != filas for fila in matriz):
             raise ValueError("La matriz debe ser cuadrada para calcular su determinante")
         
+        # Convertir a Fraction para cálculos exactos
+        matriz_frac = [[Fraction(elem) if not isinstance(elem, Fraction) else elem for elem in fila] for fila in matriz]
+        
         # Caso base: matriz 1x1
         if filas == 1:
-            return matriz[0][0]
+            return matriz_frac[0][0]
         
         # Caso base: matriz 2x2
         if filas == 2:
-            return matriz[0][0] * matriz[1][1] - matriz[0][1] * matriz[1][0]
+            return matriz_frac[0][0] * matriz_frac[1][1] - matriz_frac[0][1] * matriz_frac[1][0]
         
         # Caso base: matriz 3x3 (fórmula directa para optimización)
         if filas == 3:
-            a, b, c = matriz[0]
-            d, e, f = matriz[1]
-            g, h, i = matriz[2]
+            a, b, c = matriz_frac[0]
+            d, e, f = matriz_frac[1]
+            g, h, i = matriz_frac[2]
             return (a * e * i + b * f * g + c * d * h) - (c * e * g + a * f * h + b * d * i)
         
         # Para matrices grandes (n ≥ 4), usamos eliminación gaussiana para mejor rendimiento
         if filas >= 4:
             return AlgebraLineal._determinante_gauss(matriz)
-        
         # Expansión por cofactores a lo largo de la primera fila para matrices medianas
         det = 0
         for j in range(filas):
@@ -759,7 +796,6 @@ class AlgebraLineal:
             det += cofactor if j % 2 == 0 else -cofactor
             
         return det
-    
     @staticmethod
     def inversa(matriz):
         """
@@ -783,15 +819,19 @@ class AlgebraLineal:
         # Comprobar si es una matriz cuadrada
         if any(len(fila) != filas for fila in matriz):
             raise ValueError("La matriz debe ser cuadrada para calcular su inversa")
-          # Calcular el determinante
-        det = AlgebraLineal.determinante(matriz)
+        
+        # Convertir a Fraction para cálculos exactos
+        matriz_frac = [[Fraction(elem) if not isinstance(elem, Fraction) else elem for elem in fila] for fila in matriz]
+        
+        # Calcular el determinante
+        det = AlgebraLineal.determinante(matriz_frac)
         
         if abs(det) < AlgebraLineal.TOLERANCIA:  # Usar la tolerancia definida para evitar problemas de precisión
             raise ValueError("La matriz no es invertible (determinante = 0)")
         
         # Para una matriz 1x1, la inversa es trivial
         if filas == 1:
-            return [[1 / matriz[0][0]]]
+            return [[Fraction(1) / matriz_frac[0][0]]]
         
         # Calcular la matriz de cofactores
         cofactores = AlgebraLineal.crear_matriz(filas, filas)
@@ -975,7 +1015,7 @@ class AlgebraLineal:
             plt.show()
     
     @staticmethod
-    def visualizar_transformacion_lineal(matriz_transformacion, titulo="Visualización de Transformación Lineal", figsize=(12, 6), grid_lines=10, mostrar_detalle=True):
+    def visualizar_transformacion_lineal(matriz_transformacion, titulo="Visualización de Transformación Lineal", figsize=(12, 6), grid_lines=10, mostrar_etiquetas=True):
         """
         Visualiza el resultado de una transformación lineal calculada con el método transformacion_lineal.
         
@@ -1152,7 +1192,7 @@ class AlgebraLineal:
                      color='b', label="T(e₃)")
             
             # Etiquetas y detalles
-            if mostrar_detalle:
+            if mostrar_etiquetas:
                 ax2.text(vector_e1_transformado[0]*1.1, vector_e1_transformado[1]*1.1, vector_e1_transformado[2]*1.1, 
                         f"T(e₁)=({vector_e1_transformado[0]:.1f},{vector_e1_transformado[1]:.1f},{vector_e1_transformado[2]:.1f})", color='r')
                 ax2.text(vector_e2_transformado[0]*1.1, vector_e2_transformado[1]*1.1, vector_e2_transformado[2]*1.1, 
@@ -1166,14 +1206,12 @@ class AlgebraLineal:
                 info_text = matriz_str + f"\n\ndet(T) = {det:.2f}"
                 
                 # Colocar texto en un lugar visible
-                ax2.text2D(0.05, 0.95, info_text, transform=ax2.transAxes, fontsize=10,
+                ax2.text(0.05, 0.95, info_text, transform=ax2.transAxes, fontsize=10,
                          verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.7))
-              # Calcular límites para la vista transformada
-            max_val = np.max(np.abs(puntos_transformados))
-            ax2.set_xlim(-max_val*1.2, max_val*1.2)
-            ax2.set_ylim(-max_val*1.2, max_val*1.2)
-            ax2.set_zlim(-max_val*1.2, max_val*1.2)
-            
+        
+            ax2.set_xlim([-1.5, 1.5])
+            ax2.set_ylim([-1.5, 1.5])
+            ax2.set_zlim([-1.5, 1.5])
             ax2.set_xlabel('X')
             ax2.set_ylabel('Y')
             ax2.set_zlabel('Z')
@@ -1385,133 +1423,30 @@ class AlgebraLineal:
         ax2.quiver(0, 0, 0, vector_e3_transformado[0], vector_e3_transformado[1], vector_e3_transformado[2], 
                   color='b', label="T(e₃)")
         
-        # Agregar etiquetas con las coordenadas de los vectores transformados
-        if mostrar_etiquetas:
+        # Etiquetas y detalles
+        if mostrar_detalle:
             ax2.text(vector_e1_transformado[0]*1.1, vector_e1_transformado[1]*1.1, vector_e1_transformado[2]*1.1, 
                     f"T(e₁)=({vector_e1_transformado[0]:.1f},{vector_e1_transformado[1]:.1f},{vector_e1_transformado[2]:.1f})", color='r')
             ax2.text(vector_e2_transformado[0]*1.1, vector_e2_transformado[1]*1.1, vector_e2_transformado[2]*1.1, 
-                    f"T(e₂)=({vector_e2_transformado[0]:.1f},{vector_e2_transformado[1]:.1f},{vector_e2_transformado[2]:.1f})", color='g'),
+                    f"T(e₂)=({vector_e2_transformado[0]:.1f},{vector_e2_transformado[1]:.1f},{vector_e2_transformado[2]:.1f})", color='g')
             ax2.text(vector_e3_transformado[0]*1.1, vector_e3_transformado[1]*1.1, vector_e3_transformado[2]*1.1, 
                     f"T(e₃)=({vector_e3_transformado[0]:.1f},{vector_e3_transformado[1]:.1f},{vector_e3_transformado[2]:.1f})", color='b')
             
-            # Agregar matriz de transformación como texto en la gráfica
+            # Mostrar matriz y determinante
             matriz_str = f"T = [{matriz[0,0]:.1f} {matriz[0,1]:.1f} {matriz[0,2]:.1f}\n     {matriz[1,0]:.1f} {matriz[1,1]:.1f} {matriz[1,2]:.1f}\n     {matriz[2,0]:.1f} {matriz[2,1]:.1f} {matriz[2,2]:.1f}]"
-            # Use text instead of text2D for 3D axes
-            ax2.text(0, 0, 0, matriz_str, transform=ax2.transAxes, fontsize=10,
-                     verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+            det = np.linalg.det(matriz)
+            info_text = matriz_str + f"\n\ndet(T) = {det:.2f}"
+            
+            # Colocar texto en un lugar visible
+            ax2.text(0.05, 0.95, info_text, transform=ax2.transAxes, fontsize=10,
+                     verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.7))
         
-        # Calcular los límites para mantener la proporción en la vista transformada
-        max_val = max(np.max(np.abs(puntos_transformados)))
-        ax2.set_xlim(-max_val*1.2, max_val*1.2)
-        ax2.set_ylim(-max_val*1.2, max_val*1.2)
-        ax2.set_zlim(-max_val*1.2, max_val*1.2)
-        
+        ax2.set_xlim([-1.5, 1.5])
+        ax2.set_ylim([-1.5, 1.5])
+        ax2.set_zlim([-1.5, 1.5])
         ax2.set_xlabel('X')
         ax2.set_ylabel('Y')
         ax2.set_zlabel('Z')
-        ax2.legend()
-        
-        plt.suptitle(titulo)
-        plt.tight_layout()
-        plt.show()
-
-    @staticmethod
-    def graficar_transformacion_lineal(matriz, grid_lines=10, titulo="Transformación Lineal", mostrar_etiquetas=True, figsize=(12, 6)):
-        """
-        Visualiza una transformación lineal 2D.
-        
-        Args:
-            matriz (list): Matriz de transformación 2x2
-            grid_lines (int, optional): Número de líneas de cuadrícula. Por defecto es 10.
-            titulo (str, optional): Título de la gráfica. Por defecto es "Transformación Lineal".
-            mostrar_etiquetas (bool, optional): Si es True, muestra etiquetas con los valores de la matriz. Por defecto es True.
-            figsize (tuple, optional): Tamaño de la figura. Por defecto es (12, 6).
-            
-        Returns:
-            None: Muestra la gráfica
-            
-        Example:
-            AlgebraLineal.graficar_transformacion_lineal([[0, -1], [1, 0]])  # Rotación de 90 grados
-        """
-        matriz = np.array(matriz)
-        
-        if matriz.shape != (2, 2):
-            raise ValueError("La matriz debe ser 2x2 para visualizar la transformación")
-        
-        # Crear una cuadrícula de puntos
-        x = np.linspace(-5, 5, grid_lines)
-        y = np.linspace(-5, 5, grid_lines)
-        X, Y = np.meshgrid(x, y)
-        puntos = np.vstack([X.flatten(), Y.flatten()])
-        
-        # Aplicar la transformación
-        transformados = np.dot(matriz, puntos)
-        
-        # Reorganizar en cuadrículas para graficar
-        X_transformado = transformados[0, :].reshape(grid_lines, grid_lines)
-        Y_transformado = transformados[1, :].reshape(grid_lines, grid_lines)
-        
-        # Crear la figura con dos subplots
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=figsize)
-        
-        # Graficar la cuadrícula original
-        ax1.set_title("Cuadrícula Original")
-        ax1.set_xlim(-6, 6)
-        ax1.set_ylim(-6, 6)
-        ax1.grid(True)
-        
-        # Dibujar líneas horizontales y verticales de la cuadrícula original
-        for i in range(grid_lines):
-            ax1.plot(x, [y[i]] * len(x), 'b-', alpha=0.3)  # Líneas horizontales
-            ax1.plot([x[i]] * len(y), y, 'b-', alpha=0.3)  # Líneas verticales
-        
-        # Graficar los vectores base
-        ax1.quiver(0, 0, 1, 0, angles='xy', scale_units='xy', scale=1, color='r', label="e₁")
-        ax1.quiver(0, 0, 0, 1, angles='xy', scale_units='xy', scale=1, color='g', label="e₂")
-        ax1.text(1.1, 0, "e₁=(1,0)", color='r')
-        ax1.text(0, 1.1, "e₂=(0,1)", color='g')
-        
-        ax1.axhline(y=0, color='k', linestyle='-', alpha=0.5)
-        ax1.axvline(x=0, color='k', linestyle='-', alpha=0.5)
-        ax1.legend()
-        
-        # Graficar la cuadrícula transformada
-        ax2.set_title("Cuadrícula Transformada")
-        
-        # Calcular los límites basados en los puntos transformados
-        max_val = max(np.max(np.abs(X_transformado)), np.max(np.abs(Y_transformado)))
-        ax2.set_xlim(-max_val*1.2, max_val*1.2)
-        ax2.set_ylim(-max_val*1.2, max_val*1.2)
-        ax2.grid(True)
-        
-        # Dibujar líneas horizontales y verticales de la cuadrícula transformada
-        for i in range(grid_lines):
-            ax2.plot(X_transformado[i, :], Y_transformado[i, :], 'b-', alpha=0.3)  # Horizontales transformadas
-            ax2.plot(X_transformado[:, i], Y_transformado[:, i], 'b-', alpha=0.3)  # Verticales transformadas
-        
-        # Graficar los vectores base transformados
-        vector_e1_transformado = matriz @ np.array([1, 0])
-        vector_e2_transformado = matriz @ np.array([0, 1])
-        
-        ax2.quiver(0, 0, vector_e1_transformado[0], vector_e1_transformado[1], 
-                  angles='xy', scale_units='xy', scale=1, color='r', label="T(e₁)")
-        ax2.quiver(0, 0, vector_e2_transformado[0], vector_e2_transformado[1], 
-                  angles='xy', scale_units='xy', scale=1, color='g', label="T(e₂)")
-        
-        # Agregar etiquetas con las coordenadas de los vectores transformados
-        if mostrar_etiquetas:
-            ax2.text(vector_e1_transformado[0]*1.1, vector_e1_transformado[1]*1.1, 
-                    f"T(e₁)=({vector_e1_transformado[0]:.2f},{vector_e1_transformado[1]:.2f})", color='r')
-            ax2.text(vector_e2_transformado[0]*1.1, vector_e2_transformado[1]*1.1, 
-                    f"T(e₂)=({vector_e2_transformado[0]:.2f},{vector_e2_transformado[1]:.2f})", color='g')
-            
-            # Agregar matriz de transformación como texto en la gráfica
-            matriz_str = f"T = [{matriz[0,0]:.2f} {matriz[0,1]:.2f}\n     {matriz[1,0]:.2f} {matriz[1,1]:.2f}]"
-            ax2.text(0.05, 0.95, matriz_str, transform=ax2.transAxes, fontsize=10,
-                    verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
-        
-        ax2.axhline(y=0, color='k', linestyle='-', alpha=0.5)
-        ax2.axvline(x=0, color='k', linestyle='-', alpha=0.5)
         ax2.legend()
         
         plt.suptitle(titulo)
@@ -1615,30 +1550,133 @@ class AlgebraLineal:
         ax2.quiver(0, 0, 0, vector_e3_transformado[0], vector_e3_transformado[1], vector_e3_transformado[2], 
                   color='b', label="T(e₃)")
         
-        # Agregar etiquetas con las coordenadas de los vectores transformados
-        if mostrar_etiquetas:
+        # Etiquetas y detalles
+        if mostrar_detalle:
             ax2.text(vector_e1_transformado[0]*1.1, vector_e1_transformado[1]*1.1, vector_e1_transformado[2]*1.1, 
                     f"T(e₁)=({vector_e1_transformado[0]:.1f},{vector_e1_transformado[1]:.1f},{vector_e1_transformado[2]:.1f})", color='r')
             ax2.text(vector_e2_transformado[0]*1.1, vector_e2_transformado[1]*1.1, vector_e2_transformado[2]*1.1, 
-                    f"T(e₂)=({vector_e2_transformado[0]:.1f},{vector_e2_transformado[1]:.1f},{vector_e2_transformado[2]:.1f})", color='g'),
+                    f"T(e₂)=({vector_e2_transformado[0]:.1f},{vector_e2_transformado[1]:.1f},{vector_e2_transformado[2]:.1f})", color='g')
             ax2.text(vector_e3_transformado[0]*1.1, vector_e3_transformado[1]*1.1, vector_e3_transformado[2]*1.1, 
                     f"T(e₃)=({vector_e3_transformado[0]:.1f},{vector_e3_transformado[1]:.1f},{vector_e3_transformado[2]:.1f})", color='b')
             
-            # Agregar matriz de transformación como texto en la gráfica
+            # Mostrar matriz y determinante
             matriz_str = f"T = [{matriz[0,0]:.1f} {matriz[0,1]:.1f} {matriz[0,2]:.1f}\n     {matriz[1,0]:.1f} {matriz[1,1]:.1f} {matriz[1,2]:.1f}\n     {matriz[2,0]:.1f} {matriz[2,1]:.1f} {matriz[2,2]:.1f}]"
-            # Use text instead of text2D for 3D axes
-            ax2.text(0, 0, 0, matriz_str, transform=ax2.transAxes, fontsize=10,
-                     verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+            det = np.linalg.det(matriz)
+            info_text = matriz_str + f"\n\ndet(T) = {det:.2f}"
+            
+            # Colocar texto en un lugar visible
+            ax2.text(0.05, 0.95, info_text, transform=ax2.transAxes, fontsize=10,
+                     verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.7))
         
-        # Calcular los límites para mantener la proporción en la vista transformada
-        max_val = max(np.max(np.abs(puntos_transformados)))
-        ax2.set_xlim(-max_val*1.2, max_val*1.2)
-        ax2.set_ylim(-max_val*1.2, max_val*1.2)
-        ax2.set_zlim(-max_val*1.2, max_val*1.2)
-        
+        ax2.set_xlim([-1.5, 1.5])
+        ax2.set_ylim([-1.5, 1.5])
+        ax2.set_zlim([-1.5, 1.5])
         ax2.set_xlabel('X')
         ax2.set_ylabel('Y')
         ax2.set_zlabel('Z')
+        ax2.legend()
+        
+        plt.suptitle(titulo)
+        plt.tight_layout()
+        plt.show()
+    
+    @staticmethod
+    def graficar_transformacion_lineal(matriz, grid_lines=10, titulo="Transformación Lineal", mostrar_etiquetas=True, figsize=(12, 6)):
+        """
+        Visualiza una transformación lineal 2D.
+        
+        Args:
+            matriz (list): Matriz de transformación 2x2
+            grid_lines (int, optional): Número de líneas de cuadrícula. Por defecto es 10.
+            titulo (str, optional): Título de la gráfica. Por defecto es "Transformación Lineal".
+            mostrar_etiquetas (bool, optional): Si es True, muestra etiquetas con los valores de la matriz. Por defecto es True.
+            figsize (tuple, optional): Tamaño de la figura. Por defecto es (12, 6).
+            
+        Returns:
+            None: Muestra la gráfica
+            
+        Example:
+            AlgebraLineal.graficar_transformacion_lineal([[0, -1], [1, 0]])  # Rotación de 90 grados
+        """
+        matriz = np.array(matriz)
+        
+        if matriz.shape != (2, 2):
+            raise ValueError("La matriz debe ser 2x2 para visualizar la transformación")
+        
+        # Crear una cuadrícula de puntos
+        x = np.linspace(-5, 5, grid_lines)
+        y = np.linspace(-5, 5, grid_lines)
+        X, Y = np.meshgrid(x, y)
+        puntos = np.vstack([X.flatten(), Y.flatten()])
+        
+        # Aplicar la transformación
+        transformados = np.dot(matriz, puntos)
+        
+        # Reorganizar en cuadrículas para graficar
+        X_transformado = transformados[0, :].reshape(grid_lines, grid_lines)
+        Y_transformado = transformados[1, :].reshape(grid_lines, grid_lines)
+        
+        # Crear la figura con dos subplots
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=figsize)
+        
+        # Graficar la cuadrícula original
+        ax1.set_title("Cuadrícula Original")
+        ax1.set_xlim(-6, 6)
+        ax1.set_ylim(-6, 6)
+        ax1.grid(True)
+        
+        # Dibujar líneas horizontales y verticales de la cuadrícula original
+        for i in range(grid_lines):
+            ax1.plot(x, [y[i]] * len(x), 'b-', alpha=0.3)  # Líneas horizontales
+            ax1.plot([x[i]] * len(y), y, 'b-', alpha=0.3)  # Líneas verticales
+        
+        # Graficar los vectores base
+        ax1.quiver(0, 0, 1, 0, angles='xy', scale_units='xy', scale=1, color='r', label="e₁")
+        ax1.quiver(0, 0, 0, 1, angles='xy', scale_units='xy', scale=1, color='g', label="e₂")
+        ax1.text(1.1, 0, "e₁=(1,0)", color='r')
+        ax1.text(0, 1.1, "e₂=(0,1)", color='g')
+        
+        ax1.axhline(y=0, color='k', linestyle='-', alpha=0.5)
+        ax1.axvline(x=0, color='k', linestyle='-', alpha=0.5)
+        ax1.legend()
+        
+        # Graficar la cuadrícula transformada
+        ax2.set_title("Cuadrícula Transformada")
+        
+        # Calcular los límites basados en los puntos transformados
+        max_val = max(np.max(np.abs(X_transformado)), np.max(np.abs(Y_transformado)))
+        ax2.set_xlim(-max_val*1.2, max_val*1.2)
+        ax2.set_ylim(-max_val*1.2, max_val*1.2)
+        ax2.grid(True)
+        
+        # Dibujar líneas horizontales y verticales de la cuadrícula transformada
+        for i in range(grid_lines):
+            ax2.plot(X_transformado[i, :], Y_transformado[i, :], 'b-', alpha=0.3)  # Horizontales transformadas
+            ax2.plot(X_transformado[:, i], Y_transformado[:, i], 'b-', alpha=0.3)  # Verticales transformadas
+        
+        # Graficar los vectores base transformados
+        vector_e1_transformado = matriz @ np.array([1, 0])
+        vector_e2_transformado = matriz @ np.array([0, 1])
+        
+        ax2.quiver(0, 0, vector_e1_transformado[0], vector_e1_transformado[1], 
+                  angles='xy', scale_units='xy', scale=1, color='r', label="T(e₁)")
+        ax2.quiver(0, 0, vector_e2_transformado[0], vector_e2_transformado[1], 
+                  angles='xy', scale_units='xy', scale=1, color='g', label="T(e₂)")
+        
+        # Agregar etiquetas con las coordenadas de los vectores transformados
+        if mostrar_etiquetas:
+            ax2.text(vector_e1_transformado[0]*1.1, vector_e1_transformado[1]*1.1, 
+                    f"T(e₁)=({vector_e1_transformado[0]:.2f},{vector_e1_transformado[1]:.2f})", color='r')
+            ax2.text(vector_e2_transformado[0]*1.1, vector_e2_transformado[1]*1.1, 
+                    f"T(e₂)=({vector_e2_transformado[0]:.2f},{vector_e2_transformado[1]:.2f})", color='g')
+            
+            # Agregar matriz de transformación como texto en la gráfica
+            matriz_str = f"T = [{matriz[0,0]:.2f} {matriz[0,1]:.2f}\n     {matriz[1,0]:.2f} {matriz[1,1]:.2f}]"
+            ax2.text(0.05, 0.95, matriz_str, transform=ax2.transAxes, fontsize=10,
+                    verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+        
+        ax2.axhline(y=0, color='k', linestyle='-', alpha=0.5)
+        ax2.axvline(x=0, color='k', linestyle='-', alpha=0.5)
         ax2.legend()
         
         plt.suptitle(titulo)
@@ -1665,9 +1703,10 @@ class AlgebraLineal:
         Example:
             resultado, tipo = AlgebraLineal.gauss_jordan([[1, 1, 1, 6], [2, -1, 3, 9], [3, 2, -4, 3]])
             # Para el sistema: x + y + z = 6, 2x - y + 3z = 9, 3x + 2y - 4z = 3
-        """
-        # Hacer una copia profunda de la matriz para no modificar la original
-        matriz = [fila[:] for fila in matriz_aumentada]
+        """        # Hacer una copia profunda de la matriz para no modificar la original
+        matriz = []
+        for fila in matriz_aumentada:
+            matriz.append([Fraction(elem) for elem in fila])
         
         filas = len(matriz)
         columnas = len(matriz[0])
@@ -1697,7 +1736,7 @@ class AlgebraLineal:
             # Intercambiar filas si es necesario
             if max_fila != fila_actual:
                 matriz[fila_actual], matriz[max_fila] = matriz[max_fila], matriz[fila_actual]
-                
+            
             # Normalizar la fila del pivote
             pivote = matriz[fila_actual][columna_actual]
             for j in range(columna_actual, columnas):
@@ -1716,12 +1755,13 @@ class AlgebraLineal:
             # Si hay una fila con todos ceros excepto el término independiente
             if all(abs(matriz[i][j]) < AlgebraLineal.TOLERANCIA for j in range(n_variables)) and abs(matriz[i][n_variables]) > AlgebraLineal.TOLERANCIA:
                 return None, "sin solucion"
-        
-        # Verificar si el sistema tiene infinitas soluciones
+          # Verificar si el sistema tiene infinitas soluciones
         if fila_actual < n_variables:
-            return [matriz[i][n_variables] if i < fila_actual else 0 for i in range(n_variables)], "infinitas"
+            # Usar Fraction para mantener resultados como fracciones
+            return [matriz[i][n_variables] for i in range(n_variables)], "infinitas"
         
         # El sistema tiene solución única
+        # Devolver los resultados como fracciones para mayor claridad
         return [matriz[i][n_variables] for i in range(n_variables)], "unica"
     
     @staticmethod
@@ -1736,16 +1776,16 @@ class AlgebraLineal:
         
         Returns:
             tuple: (solucion, tipo_solucion)
-                  - solucion: Lista con la solución si es única, None en caso contrario
-                  - tipo_solucion: String indicando el tipo de solución ("unica", "infinitas", "sin solucion")
+                - solucion: Lista con la solución si es única, None en caso contrario
+                - tipo_solucion: String indicando el tipo de solución ("unica", "infinitas", "sin solucion")
         
         Example:
             solucion, tipo = AlgebraLineal.gauss([[1, 1, 1, 6], [2, -1, 3, 9], [3, 2, -4, 3]])
             # Para el sistema: x + y + z = 6, 2x - y + 3z = 9, 3x + 2y - 4z = 3
-        """
-        # Hacer una copia profunda de la matriz para no modificar la original
-        amat = [fila[:] for fila in matriz_aumentada]
-        
+        """        # Hacer una copia profunda de la matriz para no modificar la original
+        amat = []
+        for fila in matriz_aumentada:
+            amat.append([Fraction(elem) for elem in fila])
         n_eq = len(amat)  # Número de ecuaciones (filas)
         n_var = len(amat[0]) - 1  # Número de variables (columnas - 1)
         
@@ -1753,10 +1793,10 @@ class AlgebraLineal:
             print("\n--- Sistema ingresado ---")
             for i in range(n_eq):
                 for j in range(n_var):
-                    print(f"{amat[i][j]:.2f}x_{j+1}", end="")
+                    print(f"{amat[i][j]}x_{j+1}", end="")
                     if j < n_var - 1:
                         print(" + ", end="")
-                print(f" = {amat[i][n_var]:.2f}")
+                print(f" = {amat[i][n_var]}")
         
         num_piv = min(n_eq, n_var)
         is_sngl = False
@@ -1786,12 +1826,11 @@ class AlgebraLineal:
                     fact = amat[i][k] / amat[k][k]
                     for j in range(k, n_var + 1):
                         amat[i][j] -= fact * amat[k][j]
-        
         if verbose:
             print("\n--- Matriz después de la Eliminación Gaussiana ---")
             for i in range(n_eq):
                 for j in range(n_var + 1):
-                    print(f"{amat[i][j]:.4f}\t", end="")
+                    print(f"{amat[i][j]}\t", end="")
                 print()
         
         # Verificar si el sistema es sin solucion
@@ -1815,12 +1854,11 @@ class AlgebraLineal:
             if verbose:
                 print("\nEl sistema tiene infinitas soluciones.")
             return None, "infinitas"
-        else:
-            # Sustitución hacia atrás
-            sol = [0.0] * n_var
+        else:            # Sustitución hacia atrás
+            sol = [Fraction(0) for _ in range(n_var)]
             try:
                 for i in range(n_var - 1, -1, -1):
-                    curr_sum = 0.0
+                    curr_sum = Fraction(0)
                     for j in range(i + 1, n_var):
                         curr_sum += amat[i][j] * sol[j]
                     
@@ -1830,11 +1868,10 @@ class AlgebraLineal:
                         return None, "infinitas"
                     
                     sol[i] = (amat[i][n_var] - curr_sum) / amat[i][i]
-                
                 if verbose:
                     print("\n--- Soluciones ---")
                     for i in range(n_var):
-                        print(f"Solución x_{i+1} = {sol[i]:.6f}")
+                        print(f"Solución x_{i+1} = {sol[i]}")
                 
                 return sol, "unica"
             
@@ -1858,8 +1895,7 @@ class AlgebraLineal:
         Example:
             solucion, tipo = AlgebraLineal.resolver_sistema([[1, 1, 1], [2, -1, 3], [3, 2, -4]], [6, 9, 3])
             # Para el sistema: x + y + z = 6, 2x - y + 3z = 9, 3x + 2y - 4z = 3
-        """
-        # Crear la matriz aumentada [A|b]
+        """        # Crear la matriz aumentada [A|b]
         matriz_aumentada = []
         for i in range(len(coeficientes)):
             fila = coeficientes[i].copy()
@@ -1867,7 +1903,7 @@ class AlgebraLineal:
             matriz_aumentada.append(fila)
             
         return AlgebraLineal.gauss_jordan(matriz_aumentada)
-      # ======================== ANÁLISIS DE INDEPENDENCIA LINEAL ========================
+    # ======================== ANÁLISIS DE INDEPENDENCIA LINEAL ========================
     
     @staticmethod
     def calcular_rango(matriz):
@@ -1922,7 +1958,7 @@ class AlgebraLineal:
                     factor = mat[i][columna_actual]
                     for j in range(columna_actual, columnas):
                         mat[i][j] -= factor * mat[fila_actual][j]
-            
+        
             fila_actual += 1
         
         # El rango es el número de filas no nulas
@@ -2001,14 +2037,19 @@ class AlgebraLineal:
         
         if not vectores:
             return []
-          # Inicializar el resultado con ceros
+            
+        # Inicializar el resultado con ceros
         dimension = len(vectores[0])
-        resultado = [0] * dimension
+        resultado = [Fraction(0) for _ in range(dimension)]
+        
+        # Convertir vectores y coeficientes a Fraction
+        vectores_frac = [[Fraction(elem) if not isinstance(elem, Fraction) else elem for elem in v] for v in vectores]
+        coefs_frac = [Fraction(c) if not isinstance(c, Fraction) else c for c in coeficientes]
         
         # Sumar cada vector multiplicado por su coeficiente
-        for j in range(len(vectores)):
-            vector = vectores[j]
-            coef = coeficientes[j]
+        for j in range(len(vectores_frac)):
+            vector = vectores_frac[j]
+            coef = coefs_frac[j]
             for i in range(dimension):
                 resultado[i] += coef * vector[i]
         
@@ -2024,7 +2065,7 @@ class AlgebraLineal:
             conjunto_vectores (list): Conjunto de vectores
             
         Returns:
-            tuple: (bool, list/str) - (True/False, coeficientes o mensaje)
+            tuple: (bool, coeficientes o mensaje)
             
         Example:
             es_cl, coefs = AlgebraLineal.es_combinacion_lineal([3, 3], [[1, 0], [0, 1]])
@@ -2052,14 +2093,13 @@ class AlgebraLineal:
         
         # Verificar la solución reconstruyendo el vector
         reconstruccion = AlgebraLineal.combinacion_lineal(conjunto_vectores, solucion)
-          # Comparar con cierta tolerancia debido a errores de punto flotante
+        # Comparar con cierta tolerancia debido a errores de punto flotante
         es_igual = all(abs(reconstruccion[i] - vector[i]) < AlgebraLineal.TOLERANCIA for i in range(dimension))
         
         if es_igual:
             return True, solucion
         else:
             return False, "El vector no es combinación lineal del conjunto dado."
-    
     @staticmethod
     def _determinante_gauss(matriz):
         """
@@ -2074,10 +2114,12 @@ class AlgebraLineal:
         """
         # Crear copia de la matriz para no modificar la original
         n = len(matriz)
-        mat = [fila[:] for fila in matriz]
+        
+        # Convertir a Fraction para cálculos exactos
+        mat = [[Fraction(elem) if not isinstance(elem, Fraction) else elem for elem in fila] for fila in matriz]
         
         # Factor que rastrea el cambio en el determinante
-        det = 1.0
+        det = Fraction(1)
         
         # Eliminación gaussiana
         for i in range(n):
@@ -2092,7 +2134,7 @@ class AlgebraLineal:
                         break
                 else:
                     # Si no se encontró fila con elemento no cero, el determinante es cero
-                    return 0.0
+                    return Fraction(0)
             
             # Multiplicar el determinante por el pivote diagonal
             det *= mat[i][i]
