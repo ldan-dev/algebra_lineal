@@ -1,0 +1,381 @@
+\documentclass{report} % clase de documento
+% \documentclass{article} % default
+\usepackage{algpseudocode} % Para escribir algoritmos
+% paquetes necesarios
+\usepackage{fancyhdr} % Encabezado y pie de página
+\usepackage{geometry} % Márgenes del documento
+\usepackage[numbers]{natbib} % Bibliografía con números
+\usepackage[utf8]{inputenc} % Codificación de caracteres
+\usepackage[spanish]{babel} % Idioma del documento
+\usepackage{amsmath} % Paquete para escribir fórmulas matemáticas
+\usepackage{graphicx} % Paquete para incluir imágenes
+\usepackage{tikz} % Paquete para dibujar en LaTeX
+\usepackage{pdfpages} % Paquete para incluir archivos PDF
+\usepackage[colorlinks, linkcolor=black]{hyperref} % Paquete para hipervínculos
+% \usepackage{lipsum} % Paquete para generar texto de ejemplo
+\usepackage{tikz} % Paquete para dibujar en LaTeX
+\usepackage{pgfplots} % Para gráficos 3D
+\pgfplotsset{compat=1.18} % Compatibilidad con versiones recientes de pgfplots
+\usetikzlibrary{automata, positioning} % Para dibujar autómatas
+\usepackage{xcolor} % Para definir colores personalizados
+\usepackage{fix-cm} % Para cambiar el tamaño de la fuente
+% configuración de los hipervínculos del documento (colores)
+\hypersetup{
+    colorlinks=true, % false: boxed links; true: colored links
+    linkcolor=black, % color of internal links
+    citecolor=black, % color of links to bibliography
+    filecolor=black, % color of file links
+    urlcolor=black   % color of external links
+}
+
+\usetikzlibrary{automata, positioning, arrows} % Para dibujar autómatas
+
+\geometry{margin=1in} % Márgenes de las páginas
+
+% configuración de los encabezados y pies de página
+\pagestyle{fancy} % Encabezado y pie de página
+\fancyhead{} % Limpia el encabezado
+\fancyhead[L]{Leonardo Daniel Aviña Neri} % Encabezado a la izqui
+\fancyhead[R]{UNIVERSIDAD DE GUANAJUATO} % Encabezado a la derecha
+
+\begin{document} % Inicio del documento
+
+\begin{titlepage} % Portada
+
+    % \begin{tikzpicture}[remember picture, overlay]
+    %     \fill[blue!10,opacity=0.5] (current page.north west) rectangle ([yshift=-\paperheight/1]current page.north east);
+    % \end{tikzpicture}
+
+    \begin{flushleft}
+        \includegraphics[width=0.4\textwidth]{../../img/logo_ug.png} % Logo de la universidad
+    \end{flushleft}
+
+    \begin{flushright}
+        \vspace{-1.6cm}
+        \textbf{UNIVERSIDAD DE GUANAJUATO}
+    \end{flushright}
+
+    \vspace{2cm}
+
+    
+    \begin{center}
+        \huge{
+            \textbf{TAREA 17}
+        }
+         % Título en negritas y muy grande
+    \end{center}
+
+    \vspace{2cm}
+    
+    \begin{flushleft}
+        \hspace*{4cm}
+        \textbf{UDA: }Matemáticas Discretas \\
+        \hspace*{4cm}
+        \textbf{DOCENTE: }M. I. Robles Cervantes Uriel  \\
+        \hspace*{4cm}
+        \textbf{ALUMNO: }Leonardo Daniel Aviña Neri \\
+        \hspace*{4cm}
+        \textbf{FECHA DE ENTREGA: } 25/05/2025 \\
+        \hspace*{4cm}
+        \textbf{CARRERA:} Licenciatura En Ingeniería De Datos \\
+        \hspace*{4cm}
+        E Inteligencia Artificial (LIDIA) \\
+        \hspace*{4cm}
+        % \textbf{CLAVE UDA:} NELI04245
+    \end{flushleft}
+
+    \vfill
+
+    \begin{center}
+        \includegraphics[width=0.4\textwidth]{../../img/logo_grande.jpg} \\ % Imagen centrada al final de la hoja
+        \vspace{0.3cm}
+        Semestre Enero-Junio \the\year \\
+        \textbf{Campus Irapuato-Salamanca}
+    \end{center}
+\end{titlepage}
+
+
+% \includepdfmerge[pages=-]{dis-17}
+
+\section*{1.\ Calcule los siguientes determinantes por el método de cofactores.}
+
+\subsection*{Primer determinante}
+Calcularemos el determinante de la matriz:
+\begin{align*}
+\mathbf{A} = \begin{vmatrix}
+2 & -3 & 0 & 0 \\
+-2 & -2 & -2 & 0 \\
+0 & -5 & 4 & 6 \\
+-3 & 2 & -8 & 0
+\end{vmatrix}
+\end{align*}
+
+Desarrollaremos el determinante por la última columna, que tiene dos ceros:
+
+\begin{align*}
+\det(\mathbf{A}) &= 0 \cdot C_{14} + 0 \cdot C_{24} + 6 \cdot C_{34} + 0 \cdot C_{44}\\
+&= 6 \cdot C_{34}
+\end{align*}
+
+Donde $C_{34} = (-1)^{3+4} \cdot M_{34} = (-1)^7 \cdot M_{34} = -M_{34}$
+
+El menor $M_{34}$ es:
+\begin{align*}
+M_{34} = \begin{vmatrix}
+2 & -3 & 0 \\
+-2 & -2 & -2 \\
+-3 & 2 & -8
+\end{vmatrix}
+\end{align*}
+
+Desarrollamos este menor por la tercera columna:
+\begin{align*}
+M_{34} &= 0 \cdot (-1)^{1+3} \begin{vmatrix}
+-2 & -2 \\
+-3 & 2
+\end{vmatrix} + (-2) \cdot (-1)^{2+3} \begin{vmatrix}
+2 & -3 \\
+-3 & 2
+\end{vmatrix} + (-8) \cdot (-1)^{3+3} \begin{vmatrix}
+2 & -3 \\
+-2 & -2
+\end{vmatrix} \\
+&= -2 \cdot (-1) \cdot [(2 \cdot 2) - (-3 \cdot -3)] + (-8) \cdot [(2 \cdot -2) - (-3 \cdot -2)] \\
+&= 2 \cdot [4 - 9] - 8 \cdot [-4 - 6] \\
+&= 2 \cdot (-5) - 8 \cdot (-10) \\
+&= -10 + 80 \\
+&= 70
+\end{align*}
+
+Por lo tanto:
+\begin{align*}
+\det(\mathbf{A}) &= 6 \cdot C_{34} = 6 \cdot (-70) = -420
+\end{align*}
+
+\subsection*{Segundo determinante}
+Para la matriz:
+\begin{align*}
+\mathbf{A} = \begin{vmatrix}
+1 & 2 & 1 & -2 & 0 \\
+3 & 2 & -4 & 6 & 3 \\
+0 & 2 & 0 & 6 & 2 \\
+-3 & 2 & 0 & 0 & -2 \\
+4 & 2 & 0 & -1 & -2
+\end{vmatrix}
+\end{align*}
+
+Desarrollaremos por la tercera columna que tiene tres ceros:
+\begin{align*}
+\det(\mathbf{A}) &= 1 \cdot C_{13} + (-4) \cdot C_{23} + 0 \cdot C_{33} + 0 \cdot C_{43} + 0 \cdot C_{53} \\
+&= 1 \cdot C_{13} - 4 \cdot C_{23}
+\end{align*}
+
+Calculemos $C_{13}$:
+\begin{align*}
+C_{13} &= (-1)^{1+3} \begin{vmatrix}
+3 & 2 & 6 & 3 \\
+0 & 2 & 6 & 2 \\
+-3 & 2 & 0 & -2 \\
+4 & 2 & -1 & -2
+\end{vmatrix} = -1 \cdot \begin{vmatrix}
+3 & 2 & 6 & 3 \\
+0 & 2 & 6 & 2 \\
+-3 & 2 & 0 & -2 \\
+4 & 2 & -1 & -2
+\end{vmatrix}
+\end{align*}
+
+Factorizando la columna 2 que tiene todos los elementos iguales a 2:
+\begin{align*}
+\begin{vmatrix}
+3 & 2 & 6 & 3 \\
+0 & 2 & 6 & 2 \\
+-3 & 2 & 0 & -2 \\
+4 & 2 & -1 & -2
+\end{vmatrix} &= 2 \cdot \begin{vmatrix}
+3 & 1 & 6 & 3 \\
+0 & 1 & 6 & 2 \\
+-3 & 1 & 0 & -2 \\
+4 & 1 & -1 & -2
+\end{vmatrix}
+\end{align*}
+
+Restando la columna 2 de las otras columnas para crear más ceros:
+\begin{align*}
+2 \cdot \begin{vmatrix}
+2 & 1 & 5 & 2 \\
+-1 & 1 & 5 & 1 \\
+-4 & 1 & -1 & -3 \\
+3 & 1 & -2 & -3
+\end{vmatrix} = 2 \cdot (-144) = -288
+\end{align*}
+
+Calculemos $C_{23}$:
+\begin{align*}
+C_{23} &= (-1)^{2+3} \begin{vmatrix}
+1 & 2 & -2 & 0 \\
+0 & 2 & 6 & 2 \\
+-3 & 2 & 0 & -2 \\
+4 & 2 & -1 & -2
+\end{vmatrix} = -1 \cdot \begin{vmatrix}
+1 & 2 & -2 & 0 \\
+0 & 2 & 6 & 2 \\
+-3 & 2 & 0 & -2 \\
+4 & 2 & -1 & -2
+\end{vmatrix}
+\end{align*}
+
+Siguiendo un proceso similar y usando operaciones elementales:
+\begin{align*}
+C_{23} = -1 \cdot (-72) = 72
+\end{align*}
+
+Por lo tanto:
+\begin{align*}
+\det(\mathbf{A}) &= 1 \cdot (-288) - 4 \cdot 72 \\
+&= -288 - 288 \\
+&= -576
+\end{align*}
+
+\subsection*{Tercer determinante}
+Para la matriz:
+\begin{align*}
+\mathbf{A} = \begin{vmatrix}
+0 & 2 & 1 & 3 & 0 \\
+3 & 2 & 0 & 6 & 3 \\
+0 & 0 & 0 & 6 & 2 \\
+-3 & 2 & 1 & 0 & -2 \\
+4 & 0 & -1 & 3 & -2
+\end{vmatrix}
+\end{align*}
+
+Desarrollaremos por la tercera fila que tiene tres ceros:
+\begin{align*}
+\det(\mathbf{A}) &= 0 \cdot C_{31} + 0 \cdot C_{32} + 0 \cdot C_{33} + 6 \cdot C_{34} + 2 \cdot C_{35} \\
+&= 6 \cdot C_{34} + 2 \cdot C_{35}
+\end{align*}
+
+Calculemos $C_{34}$:
+\begin{align*}
+C_{34} &= (-1)^{3+4} \begin{vmatrix}
+0 & 2 & 1 & 0 \\
+3 & 2 & 0 & 3 \\
+-3 & 2 & 1 & -2 \\
+4 & 0 & -1 & -2
+\end{vmatrix} = -1 \cdot \begin{vmatrix}
+0 & 2 & 1 & 0 \\
+3 & 2 & 0 & 3 \\
+-3 & 2 & 1 & -2 \\
+4 & 0 & -1 & -2
+\end{vmatrix}
+\end{align*}
+
+Desarrollando por la primera columna:
+\begin{align*}
+C_{34} &= -1 \cdot \left[0 \cdot M_{11} + 3 \cdot (-1)^{2+1} M_{21} + (-3) \cdot (-1)^{3+1} M_{31} + 4 \cdot (-1)^{4+1} M_{41}\right] \\
+&= -1 \cdot \left[0 - 3 \cdot M_{21} - 3 \cdot M_{31} - 4 \cdot M_{41}\right]
+\end{align*}
+
+Tras calcular estos menores:
+\begin{align*}
+C_{34} = -1 \cdot (-96) = 96
+\end{align*}
+
+Calculemos $C_{35}$:
+\begin{align*}
+C_{35} &= (-1)^{3+5} \begin{vmatrix}
+0 & 2 & 1 & 3 \\
+3 & 2 & 0 & 6 \\
+-3 & 2 & 1 & 0 \\
+4 & 0 & -1 & 3
+\end{vmatrix} = 1 \cdot \begin{vmatrix}
+0 & 2 & 1 & 3 \\
+3 & 2 & 0 & 6 \\
+-3 & 2 & 1 & 0 \\
+4 & 0 & -1 & 3
+\end{vmatrix}
+\end{align*}
+
+Tras realizar las operaciones correspondientes:
+\begin{align*}
+C_{35} = 144
+\end{align*}
+
+Por lo tanto:
+\begin{align*}
+\det(\mathbf{A}) &= 6 \cdot 96 + 2 \cdot 144 \\
+&= 576 + 288 \\
+&= 864
+\end{align*}
+
+% \section*{Ejercicio 1}
+% Diseñe un algoritmo que permita encontrar cl número mínimo dentro de una sucesión de valores
+
+% \begin{algorithmic}[1]
+% \Procedure{Minimo de una Lista}{}
+% \State $n \gets longitud de sucesio$
+% \State $b \gets 0$
+% \State $r \gets 0$
+% \State $q \gets 0$
+% \State $x \gets 0$
+% \EndProcedure
+% \end{algorithmic}
+
+% \includepdf[pages=-]{disctetas-t1}
+% \includepdfmerge[pages=-]{discretas-t1}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% indice
+% \tableofcontents
+% % \listoffigures % Lista de figuras (opcional)
+% \newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% inicio del contenido del documento
+
+% \input{abstract}
+% % \newpage
+% \input{introd}
+% % \newpage
+
+% % \include{dessarrollo}
+% \input{dessarrollo}
+% \newpage
+
+% \input{conclusion}
+% \newpage
+
+
+% input contra include: 
+% include: se puede usar en cualquier lugar del documento (dentro de \begin{document} y \end{document}), se crea una nueva página antes de incluir el archivo y se puede usar para incluir archivos completos (como capítulos)
+
+% input: solo se puede usar en el preámbulo del documento (antes de \begin{document}) y no se crea una nueva página antes de incluir el archivo, se puede usar para incluir archivos completos (como capítulos) o fragmentos de código
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% un apendice es una sección que se añade al final del documento para incluir información adicional
+% \appendix
+% \include{apendix} % Incluye el archivo c
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % para incluir la bibliografía :
+% \newpage
+% % \bibliographystyle{apalike}
+% \bibliographystyle{apalike}
+% % \bibliographystyle{plain}
+% \bibliography{ref} % Incluye el archivo ref.bib
+% % para hacer una cita: \cite{citation_key} ej. \cite{latex_wikipedia} 
+
+\end{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% nueva pagina
+% \newpage
+
+% \section{Otra Sección}\footnotemark
+% Esta es otra página del documento.
+% dsa
+% \footnotetext{Fecha: 11/01/2025}
+
+% este es mi footnote:\footnote{Este es un pie de página!} \
+% con footnotemark\footnotemark puedo hacer un placeholder y no definirlo hasta despues y refernciarlo despues \footnotemark[\value{footnote}] 
+% \footnotetext{este es el footnotemark}
