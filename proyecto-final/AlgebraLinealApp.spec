@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['ui.py'],
+    ['ui_fixed.py'],
     pathex=[],
     binaries=[],
     datas=[('assets/logo.png', 'assets')],
