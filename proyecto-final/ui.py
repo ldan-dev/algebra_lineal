@@ -776,11 +776,11 @@ class AlgebraLinealGUI:
                 args["mostrar_detalle"] = param_widgets["mostrar_detalle"].get()
             
             elif method_name == "graficar_funcion":
-                # Crear una función a partir de la cadena
-                func_str = param_widgets["f"].get()
-                args["f"] = lambda x: eval(func_str)
-                args["x_min"] = param_widgets["x_min"].get_value()
-                args["x_max"] = param_widgets["x_max"].get_value()
+                # Obtener la expresión como string
+                expr_str = param_widgets["f"].get()
+                args["expr"] = expr_str
+                args["x_min"] = float(param_widgets["x_min"].get_value())
+                args["x_max"] = float(param_widgets["x_max"].get_value())
                 args["puntos"] = int(param_widgets["puntos"].get_value())
                 args["titulo"] = param_widgets["titulo"].get()
                 args["etiqueta_x"] = param_widgets["etiqueta_x"].get()

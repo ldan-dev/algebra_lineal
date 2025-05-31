@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from fractions import Fraction
+import re
 
 class AlgebraLineal:
     """
@@ -856,12 +857,13 @@ class AlgebraLineal:
     
     # ======================== VISUALIZACIÓN ========================
     @staticmethod
-    def graficar_funcion(f, x_min, x_max, puntos=100, titulo="Gráfica de función", etiqueta_x="x", etiqueta_y="f(x)", mostrar_puntos_destacados=True):
+    def graficar_funcion(expr, x_min, x_max, puntos=100, titulo="Gráfica de función", etiqueta_x="x", etiqueta_y="f(x)", mostrar_puntos_destacados=True):
         """
-        Grafica una función en un intervalo dado.
+        Grafica una función en un intervalo dado. Permite ingresar expresiones como strings
+        con funciones trigonométricas (sin, cos, tan, cot, sec, csc) y logaritmo natural (ln).
         
         Args:
-            f (function): Función a graficar que toma un valor x y devuelve un valor y
+            expr (str or function): Expresión de la función (ejemplo: "3*cos(x-1)+2") o función lambda
             x_min (float): Valor mínimo de x
             x_max (float): Valor máximo de x
             puntos (int, optional): Número de puntos para graficar. Por defecto es 100.
@@ -874,35 +876,69 @@ class AlgebraLineal:
             None: Muestra la gráfica
             
         Example:
-            AlgebraLineal.graficar_funcion(lambda x: x**2, -5, 5, titulo="Parábola")
+            AlgebraLineal.graficar_funcion("3*cos(x-1)+2", -5, 5, titulo="Coseno desplazado")
         """
-        x = [x_min + i * (x_max - x_min) / (puntos - 1) for i in range(puntos)]
-        y = [f(valor_x) for valor_x in x]
+
+        # Si es función, usarla directamente
+        if callable(expr):
+            f = expr
+        else:
+            # Procesar string: reemplazar funciones por numpy y permitir mayúsculas/minúsculas
+            expr_proc = expr.lower()
+            # Reemplazos para funciones trigonométricas y ln
+            reemplazos = {
+                r'\bcos\b': 'np.cos',
+                r'\bsin\b': 'np.sin',
+                r'\btan\b': 'np.tan',
+                r'\bcot\b': '(1/np.tan',
+                r'\bsec\b': '(1/np.cos',
+                r'\bcsc\b': '(1/np.sin',
+                r'\bln\b': 'np.log',
+            }
+            # Para cot, sec, csc: agregamos paréntesis extra para el argumento
+            expr_proc = re.sub(r'\bcot\s*\(', r'(1/np.tan(', expr_proc)
+            expr_proc = re.sub(r'\bsec\s*\(', r'(1/np.cos(', expr_proc)
+            expr_proc = re.sub(r'\bcsc\s*\(', r'(1/np.sin(', expr_proc)
+            # Para sin, cos, tan, ln: reemplazo directo
+            expr_proc = re.sub(r'\bcos\b', 'np.cos', expr_proc)
+            expr_proc = re.sub(r'\bsin\b', 'np.sin', expr_proc)
+            expr_proc = re.sub(r'\btan\b', 'np.tan', expr_proc)
+            expr_proc = re.sub(r'\bln\b', 'np.log', expr_proc)
+            # Cerrar paréntesis extra para cot, sec, csc
+            expr_proc = re.sub(r'(1/np\.tan\([^\)]+\))', r'\1', expr_proc)
+            expr_proc = re.sub(r'(1/np\.cos\([^\)]+\))', r'\1', expr_proc)
+            expr_proc = re.sub(r'(1/np\.sin\([^\)]+\))', r'\1', expr_proc)
+            # Permitir 'e' como np.e
+            expr_proc = re.sub(r'(?<![a-zA-Z0-9_])e(?![a-zA-Z0-9_])', 'np.e', expr_proc)
+            # Permitir 'pi' como np.pi
+            expr_proc = re.sub(r'(?<![a-zA-Z0-9_])pi(?![a-zA-Z0-9_])', 'np.pi', expr_proc)
+            # Permitir potencias con '^'
+            expr_proc = expr_proc.replace('^', '**')
+            # Definir función segura
+            def f(x):
+                return eval(expr_proc, {"np": np, "x": x, "__builtins__": {}})
+        
+        x = np.linspace(x_min, x_max, puntos)
+        try:
+            y = f(x)
+        except Exception as e:
+            raise ValueError(f"Error al evaluar la función: {e}")
         
         plt.figure(figsize=(10, 6))
-        
-        # Graficar la función principal
         plt.plot(x, y, label=f"f(x)")
         
-        # Añadir algunos puntos destacados si se solicita
         if mostrar_puntos_destacados:
-            # Seleccionamos algunos puntos destacados
-            num_puntos_destacados = min(5, puntos)  # Máximo 5 puntos para no sobrecargar
+            num_puntos_destacados = min(5, puntos)
             indices = [int(i * (puntos - 1) / (num_puntos_destacados - 1)) for i in range(num_puntos_destacados)]
-            
-            puntos_x = [x[i] for i in indices]
-            puntos_y = [y[i] for i in indices]
-            
-            # Plotear los puntos destacados
+            puntos_x = x[indices]
+            puntos_y = y[indices]
             plt.scatter(puntos_x, puntos_y, color='red', zorder=5)
-            
-            # Añadir etiquetas para los puntos destacados
             for i in range(len(puntos_x)):
                 plt.annotate(f"({puntos_x[i]:.2f}, {puntos_y[i]:.2f})", 
-                           (puntos_x[i], puntos_y[i]),
-                           textcoords="offset points",
-                           xytext=(0, 10),
-                           ha='center')
+                             (puntos_x[i], puntos_y[i]),
+                             textcoords="offset points",
+                             xytext=(0, 10),
+                             ha='center')
         
         plt.title(titulo)
         plt.xlabel(etiqueta_x)
