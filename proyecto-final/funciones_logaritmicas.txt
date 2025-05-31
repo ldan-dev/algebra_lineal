@@ -1,0 +1,163 @@
+"""
+Implementación del método graficar_funciones_logaritmicas para la clase AlgebraLineal.
+"""
+
+@staticmethod
+def graficar_funciones_logaritmicas(funciones=None, x_min=0.1, x_max=10, puntos=200, 
+                                  titulo="Funciones Logarítmicas", etiquetas=None,
+                                  mostrar_puntos_destacados=False, bases_personalizadas=None):
+    """
+    Grafica funciones logarítmicas.
+    
+    Args:
+        funciones (list, optional): Lista de strings con las funciones a graficar.
+            Opciones: 'ln', 'log10', 'log2' o nombres personalizados para bases personalizadas.
+            Por defecto, grafica el logaritmo natural (ln).
+        x_min (float, optional): Valor mínimo de x. Por defecto es 0.1 (para evitar el dominio negativo).
+        x_max (float, optional): Valor máximo de x. Por defecto es 10.
+        puntos (int, optional): Número de puntos para graficar. Por defecto es 200.
+        titulo (str, optional): Título de la gráfica. Por defecto es "Funciones Logarítmicas".
+        etiquetas (list, optional): Lista de etiquetas para cada función. Por defecto usa los nombres estándar.
+        mostrar_puntos_destacados (bool, optional): Si es True, muestra puntos destacados en las funciones.
+        bases_personalizadas (dict, optional): Diccionario que mapea nombres a bases para logaritmos personalizados.
+            Ejemplo: {'log3': 3, 'log5': 5}
+            
+    Returns:
+        None: Muestra la gráfica
+        
+    Example:
+        # Graficar logaritmo natural y logaritmo base 10
+        AlgebraLineal.graficar_funciones_logaritmicas(['ln', 'log10'])
+        
+        # Graficar logaritmos con bases personalizadas
+        AlgebraLineal.graficar_funciones_logaritmicas(
+            ['log3', 'log5'], 
+            bases_personalizadas={'log3': 3, 'log5': 5},
+            etiquetas=['log₃(x)', 'log₅(x)']
+        )
+    """
+    import matplotlib.pyplot as plt
+    import numpy as np
+    import math
+    
+    # Valores por defecto
+    if funciones is None:
+        funciones = ["ln"]
+    
+    if bases_personalizadas is None:
+        bases_personalizadas = {}
+    
+    # Generar los valores de x (evitando el dominio negativo y el cero)
+    if x_min <= 0:
+        print(f"Advertencia: x_min debe ser positivo para funciones logarítmicas. Cambiando de {x_min} a 0.1.")
+        x_min = 0.1
+    
+    x = np.linspace(x_min, x_max, puntos)
+    
+    # Generar etiquetas por defecto si no se proporcionan
+    if etiquetas is None:
+        etiquetas = []
+        for f in funciones:
+            if f == "ln":
+                etiquetas.append("ln(x)")
+            elif f == "log10":
+                etiquetas.append("log₁₀(x)")
+            elif f == "log2":
+                etiquetas.append("log₂(x)")
+            elif f in bases_personalizadas:
+                base = bases_personalizadas[f]
+                etiquetas.append(f"log_{base}(x)")
+            else:
+                etiquetas.append(f)
+    
+    # Asegurar que tengamos suficientes etiquetas
+    while len(etiquetas) < len(funciones):
+        etiquetas.append(f"Función {len(etiquetas) + 1}")
+    
+    plt.figure(figsize=(10, 6))
+    
+    # Colores para las diferentes funciones
+    colores = ['b', 'r', 'g', 'c', 'm', 'y', 'k']
+    
+    # Graficar cada función
+    for i, func_name in enumerate(funciones):
+        color = colores[i % len(colores)]
+        
+        try:
+            # Calcular los valores y según la función
+            if func_name == "ln":
+                y = np.log(x)  # Logaritmo natural (base e)
+            elif func_name == "log10":
+                y = np.log10(x)  # Logaritmo base 10
+            elif func_name == "log2":
+                y = np.log2(x)  # Logaritmo base 2
+            elif func_name in bases_personalizadas:
+                # Logaritmo con base personalizada: log_b(x) = ln(x) / ln(b)
+                base = bases_personalizadas[func_name]
+                y = np.log(x) / np.log(base)
+            else:
+                # Si no reconocemos el nombre, asumimos logaritmo natural
+                print(f"Advertencia: Función logarítmica '{func_name}' no reconocida. Usando logaritmo natural.")
+                y = np.log(x)
+            
+            # Graficar la función
+            plt.plot(x, y, color=color, label=etiquetas[i])
+            
+            # Añadir puntos destacados si se solicita
+            if mostrar_puntos_destacados:
+                # Puntos especiales como (1,0) y puntos en números enteros
+                special_points_x = [1]  # El punto (1,0) es común a todas las funciones logarítmicas
+                
+                # Añadir algunos puntos enteros dentro del rango
+                for p in range(2, int(x_max) + 1):
+                    if p > x_min and p <= x_max:
+                        special_points_x.append(p)
+                
+                # Limitar a máximo 5 puntos especiales
+                if len(special_points_x) > 5:
+                    step = len(special_points_x) // 5
+                    special_points_x = special_points_x[::step][:5]
+                
+                special_points_y = []
+                for px in special_points_x:
+                    if func_name == "ln":
+                        py = np.log(px)
+                    elif func_name == "log10":
+                        py = np.log10(px)
+                    elif func_name == "log2":
+                        py = np.log2(px)
+                    elif func_name in bases_personalizadas:
+                        base = bases_personalizadas[func_name]
+                        py = np.log(px) / np.log(base)
+                    else:
+                        py = np.log(px)
+                    special_points_y.append(py)
+                
+                plt.scatter(special_points_x, special_points_y, color=color, zorder=5)
+                
+                # Añadir etiquetas a los puntos especiales
+                for j in range(len(special_points_x)):
+                    plt.annotate(f"({special_points_x[j]}, {special_points_y[j]:.2f})",
+                                (special_points_x[j], special_points_y[j]),
+                                textcoords="offset points",
+                                xytext=(0, 10),
+                                ha='center',
+                                fontsize=8)
+        
+        except Exception as e:
+            print(f"Error al graficar la función logarítmica '{func_name}': {str(e)}")
+    
+    # Configurar la gráfica
+    plt.title(titulo)
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.grid(True)
+    plt.axhline(y=0, color='k', linestyle='-', alpha=0.3)
+    plt.axvline(x=0, color='k', linestyle='-', alpha=0.3)
+    
+    # Añadir leyenda
+    if len(funciones) > 1:
+        plt.legend()
+    
+    plt.tight_layout()
+    plt.show()

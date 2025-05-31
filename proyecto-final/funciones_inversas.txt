@@ -1,0 +1,148 @@
+    @staticmethod
+    def graficar_funciones_inversas(f, x_min=-10, x_max=10, y_min=None, y_max=None, puntos=200, 
+                                  titulo="Función y su inversa", etiquetas=None, mostrar_puntos_destacados=False):
+        """
+        Grafica una función y su inversa en la misma gráfica.
+        
+        Args:
+            f (function): Función a graficar y de la cual se calculará su inversa
+            x_min (float, optional): Valor mínimo de x para la función original. Por defecto es -10.
+            x_max (float, optional): Valor máximo de x para la función original. Por defecto es 10.
+            y_min (float, optional): Valor mínimo de y para limitar la gráfica de la función inversa. Por defecto es None.
+            y_max (float, optional): Valor máximo de y para limitar la gráfica de la función inversa. Por defecto es None.
+            puntos (int, optional): Número de puntos para graficar. Por defecto es 200.
+            titulo (str, optional): Título de la gráfica. Por defecto es "Función y su inversa".
+            etiquetas (list, optional): Lista con dos etiquetas [etiqueta_funcion, etiqueta_inversa]. Por defecto, se generan automáticamente.
+            mostrar_puntos_destacados (bool, optional): Si es True, muestra puntos destacados. Por defecto es False.
+            
+        Returns:
+            None: Muestra la gráfica
+            
+        Example:
+            # Graficar función cuadrática y su inversa (en dominio positivo)
+            AlgebraLineal.graficar_funciones_inversas(
+                lambda x: x**2, 
+                x_min=0,  # Limitamos el dominio a valores positivos para que la función sea inyectiva
+                x_max=5, 
+                etiquetas=["f(x) = x²", "f⁻¹(x)"]
+            )
+        """
+        # Generar valores x para la función original
+        x_orig = [x_min + i * (x_max - x_min) / (puntos - 1) for i in range(puntos)]
+        
+        # Calcular valores y para la función original, eliminando valores no válidos
+        x_validos = []
+        y_validos = []
+        
+        for x_val in x_orig:
+            try:
+                y_val = f(x_val)
+                if not isinstance(y_val, complex) and not math.isnan(y_val) and not math.isinf(y_val):
+                    x_validos.append(x_val)
+                    y_validos.append(y_val)
+            except Exception:
+                pass
+        
+        # Calcular el rango de valores y para la función original
+        if not y_validos:
+            raise ValueError("No se pudieron calcular valores válidos para la función en el dominio especificado")
+        
+        if y_min is None:
+            y_min = min(y_validos)
+        if y_max is None:
+            y_max = max(y_validos)
+        
+        # Verificar si la función parece ser inyectiva en el dominio proporcionado
+        y_unicos = set()
+        duplicados = False
+        for y_val in y_validos:
+            # Redondear para manejar errores de punto flotante
+            y_redondeado = round(y_val, 10)
+            if y_redondeado in y_unicos:
+                duplicados = True
+                break
+            y_unicos.add(y_redondeado)
+        
+        # Advertir si la función no parece ser inyectiva
+        if duplicados:
+            print("Advertencia: La función no parece ser inyectiva en el dominio proporcionado.")
+            print("La gráfica de la inversa puede no ser precisa o completa.")
+        
+        # Generar valores para la función inversa
+        # Usamos los valores y de la función original como valores x para la inversa
+        x_inv = y_validos.copy()
+        y_inv = x_validos.copy()
+        
+        # Ordenar los puntos para la función inversa
+        puntos_inv = sorted(zip(x_inv, y_inv))
+        x_inv = [p[0] for p in puntos_inv]
+        y_inv = [p[1] for p in puntos_inv]
+        
+        # Configurar etiquetas
+        if etiquetas is None:
+            etiquetas = ["f(x)", "f⁻¹(x)"]
+        
+        plt.figure(figsize=(12, 8))
+        
+        # Graficar la función original
+        plt.plot(x_validos, y_validos, 'b-', label=etiquetas[0])
+        
+        # Graficar la función inversa
+        plt.plot(x_inv, y_inv, 'r--', label=etiquetas[1])
+        
+        # Graficar la línea y = x (simetría de la inversa)
+        min_val = min(x_min, y_min)
+        max_val = max(x_max, y_max)
+        plt.plot([min_val, max_val], [min_val, max_val], 'g:', alpha=0.5, label="y = x")
+        
+        # Añadir puntos destacados si se solicita
+        if mostrar_puntos_destacados:
+            # Seleccionamos algunos puntos destacados para la función original
+            num_puntos = min(5, len(x_validos))
+            if num_puntos > 1:
+                indices = [int(i * (len(x_validos) - 1) / (num_puntos - 1)) for i in range(num_puntos)]
+                
+                puntos_x = [x_validos[i] for i in indices]
+                puntos_y = [y_validos[i] for i in indices]
+                
+                # Plotear los puntos destacados
+                plt.scatter(puntos_x, puntos_y, color='blue', zorder=5)
+                
+                # Añadir etiquetas para los puntos destacados
+                for i in range(len(puntos_x)):
+                    plt.annotate(f"({puntos_x[i]:.2f}, {puntos_y[i]:.2f})", 
+                               (puntos_x[i], puntos_y[i]),
+                               textcoords="offset points",
+                               xytext=(0, 10),
+                               ha='center',
+                               fontsize=8)
+                
+                # También añadimos puntos destacados para la inversa
+                puntos_x_inv = [x_inv[i] for i in indices if i < len(x_inv)]
+                puntos_y_inv = [y_inv[i] for i in indices if i < len(y_inv)]
+                
+                plt.scatter(puntos_x_inv, puntos_y_inv, color='red', zorder=5)
+                
+                for i in range(len(puntos_x_inv)):
+                    plt.annotate(f"({puntos_x_inv[i]:.2f}, {puntos_y_inv[i]:.2f})", 
+                               (puntos_x_inv[i], puntos_y_inv[i]),
+                               textcoords="offset points",
+                               xytext=(0, 10),
+                               ha='center',
+                               fontsize=8)
+        
+        # Configurar la gráfica
+        plt.title(titulo)
+        plt.xlabel("x")
+        plt.ylabel("y")
+        plt.grid(True)
+        plt.axhline(y=0, color='k', linestyle='-', alpha=0.3)
+        plt.axvline(x=0, color='k', linestyle='-', alpha=0.3)
+        
+        # Ajustar límites para mostrar ambas funciones adecuadamente
+        plt.xlim(min(x_min, y_min), max(x_max, y_max))
+        plt.ylim(min(x_min, y_min), max(x_max, y_max))
+        
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
